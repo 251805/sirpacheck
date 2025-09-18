@@ -5,136 +5,127 @@
   <title>Pagbilao Weather & Traffic Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-    header { background: #004aad; color: white; padding: 1rem; text-align: center; }
-    h2 { margin-top: 2rem; text-align: center; }
-    .barangay-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; padding: 1rem; }
-    .card { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .card h3 { margin-top: 0; }
-    .traffic, .pagasa { margin: 1rem; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    iframe { width: 100%; height: 400px; border: none; border-radius: 12px; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+    header { background: #2c3e50; color: white; padding: 1rem; text-align: center; }
+    h2 { margin-top: 1rem; }
+    .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; }
+    .card { background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .traffic, .windy { margin: 1rem; padding: 1rem; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    iframe { width: 100%; height: 400px; border: none; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🌦 Pagbilao, Quezon — Weather & Traffic</h1>
-    <p>Live weather per barangay + traffic updates + PAGASA feed</p>
-  </header>
 
-  <section class="traffic">
-    <h2>🚦 Traffic on Maharlika Highway</h2>
-    <div id="trafficData">Loading traffic data...</div>
-  </section>
+<header>
+  <h1>🌦 Pagbilao, Quezon Weather & Traffic Dashboard</h1>
+  <p>Barangay-level Weather | Maharlika Highway Traffic | Windy Map</p>
+</header>
 
-  <h2>🌍 West Barangays</h2>
-  <div id="west" class="barangay-group"></div>
+<section class="traffic">
+  <h2>🚗 Traffic (Maharlika Highway)</h2>
+  <p id="traffic-status">Loading traffic data...</p>
+</section>
 
-  <h2>🏙 Center Barangays</h2>
-  <div id="center" class="barangay-group"></div>
+<h2 style="padding-left:1rem;">🏘 West Barangays</h2>
+<div class="container" id="west"></div>
 
-  <h2>🌄 East Barangays</h2>
-  <div id="east" class="barangay-group"></div>
+<h2 style="padding-left:1rem;">🏙 Poblacion (Center)</h2>
+<div class="container" id="center"></div>
 
-  <section class="pagasa">
-    <h2>🌧 PAGASA / Panahon Feed</h2>
-    <iframe src="https://www.panahon.gov.ph"></iframe>
-  </section>
+<h2 style="padding-left:1rem;">🌄 East Barangays</h2>
+<div class="container" id="east"></div>
 
-  <script>
-    const OPENWEATHER_KEY = "d77dbc9c66952dae67f86c58ab653dec";
-    const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
+<section class="windy">
+  <h2>🌍 Windy Map</h2>
+  <iframe src="https://embed.windy.com/embed2.html?key=iiOFIctYLRkwVoxFHqG4npNTG1X1qYQ2&lat=13.964&lon=121.698&zoom=10"></iframe>
+</section>
 
-    // Barangay groups with approximate coordinates
-    const barangays = {
-      west: [
-        { name: "Añato", lat: 13.977, lon: 121.720 },
-        { name: "Alupaye", lat: 13.971, lon: 121.723 },
-        { name: "Antipolo", lat: 13.965, lon: 121.710 },
-        { name: "Bagumbungan Iba.", lat: 13.959, lon: 121.703 },
-        { name: "Bagumbungan Ila.", lat: 13.962, lon: 121.706 },
-        { name: "Bantigue", lat: 13.955, lon: 121.699 },
-        { name: "Bigo", lat: 13.950, lon: 121.695 },
-        { name: "Binahaan", lat: 13.945, lon: 121.690 },
-        { name: "Bukal", lat: 13.940, lon: 121.685 },
-        { name: "Ikirin", lat: 13.938, lon: 121.680 }
-      ],
-      center: [
-        { name: "Castillo (Poblacion)", lat: 13.969, lon: 121.709 },
-        { name: "Daungan (Poblacion)", lat: 13.968, lon: 121.708 },
-        { name: "Del Carmen (Poblacion)", lat: 13.967, lon: 121.707 },
-        { name: "Parang (Poblacion)", lat: 13.966, lon: 121.706 },
-        { name: "Sta. Catalina (Poblacion)", lat: 13.965, lon: 121.705 },
-        { name: "Tambak (Poblacion)", lat: 13.964, lon: 121.704 },
-        { name: "Mapagong", lat: 13.963, lon: 121.703 },
-        { name: "Pinagbayanan", lat: 13.962, lon: 121.702 }
-      ],
-      east: [
-        { name: "Malicboy Kan.", lat: 13.958, lon: 121.710 },
-        { name: "Malicboy Sil.", lat: 13.956, lon: 121.715 },
-        { name: "Mayhay", lat: 13.955, lon: 121.718 },
-        { name: "Palsabangon Iba.", lat: 13.954, lon: 121.721 },
-        { name: "Palsabangon Ila.", lat: 13.952, lon: 121.724 },
-        { name: "Talipan", lat: 13.951, lon: 121.727 },
-        { name: "Tukalan", lat: 13.950, lon: 121.730 },
-        { name: "Polo Iba.", lat: 13.949, lon: 121.733 },
-        { name: "Polo Ila.", lat: 13.948, lon: 121.736 }
-      ]
-    };
+<script>
+const OPENWEATHER_KEY = "d77dbc9c66952dae67f86c58ab653dec";
+const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
 
-    // Fetch weather per barangay
-    async function fetchWeather(barangay) {
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${barangay.lat}&lon=${barangay.lon}&appid=${OPENWEATHER_KEY}&units=metric`;
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error("Weather fetch failed");
-      return resp.json();
-    }
+// Barangays grouped
+const barangays = {
+  west: [
+    {name:"Añato", lat:13.9350, lon:121.6700},
+    {name:"Alupaye", lat:13.9400, lon:121.6600},
+    {name:"Antipolo", lat:13.9500, lon:121.6550},
+    {name:"Bagumbungan Iba.", lat:13.9450, lon:121.6450},
+    {name:"Bagumbungan Ila.", lat:13.9500, lon:121.6400},
+    {name:"Bantigue", lat:13.9550, lon:121.6350},
+    {name:"Bigo", lat:13.9600, lon:121.6300},
+    {name:"Binahaan", lat:13.9650, lon:121.6250},
+    {name:"Bukal", lat:13.9700, lon:121.6200},
+    {name:"Ikirin", lat:13.9750, lon:121.6150}
+  ],
+  center: [
+    {name:"Castillo (Poblacion)", lat:13.964, lon:121.698},
+    {name:"Daungan (Poblacion)", lat:13.965, lon:121.699},
+    {name:"Del Carmen (Poblacion)", lat:13.966, lon:121.700},
+    {name:"Parang (Poblacion)", lat:13.967, lon:121.701},
+    {name:"Sta. Catalina (Poblacion)", lat:13.968, lon:121.702},
+    {name:"Tambak (Poblacion)", lat:13.969, lon:121.703},
+    {name:"Mapagong", lat:13.970, lon:121.704},
+    {name:"Pinagbayanan", lat:13.971, lon:121.705}
+  ],
+  east: [
+    {name:"Malicboy Kan.", lat:13.980, lon:121.710},
+    {name:"Malicboy Sil.", lat:13.981, lon:121.715},
+    {name:"Mayhay", lat:13.982, lon:121.720},
+    {name:"Palsabangon Iba.", lat:13.983, lon:121.725},
+    {name:"Palsabangon Ila.", lat:13.984, lon:121.730},
+    {name:"Talipan", lat:13.985, lon:121.735},
+    {name:"Tukalan", lat:13.986, lon:121.740},
+    {name:"Polo Iba.", lat:13.987, lon:121.745},
+    {name:"Polo Ila.", lat:13.988, lon:121.750}
+  ]
+};
 
-    async function displayBarangays(group, containerId) {
-      const container = document.getElementById(containerId);
-      for (let b of barangays[group]) {
-        try {
-          const data = await fetchWeather(b);
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `
-            <h3>${b.name}</h3>
-            <p>🌡 Temp: ${data.main.temp}°C</p>
-            <p>💧 Humidity: ${data.main.humidity}%</p>
-            <p>🌬 Wind: ${data.wind.speed} m/s</p>
-            <p>☁ Cloud Cover: ${data.clouds.all}%</p>
-            <p>🌧 Rain Chance: ${data.rain ? (data.rain["1h"] || 0) + " mm" : "0 mm"}</p>
-          `;
-          container.appendChild(card);
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    }
+// Fetch weather for each barangay
+async function fetchWeather(barangay, containerId) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${barangay.lat}&lon=${barangay.lon}&appid=${OPENWEATHER_KEY}&units=metric`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h3>${barangay.name}</h3>
+      <p>🌡 Temp: ${data.main.temp} °C</p>
+      <p>💧 Humidity: ${data.main.humidity}%</p>
+      <p>🌬 Wind: ${data.wind.speed} m/s</p>
+      <p>☁ Clouds: ${data.clouds.all}%</p>
+      <p>🌧 Rain: ${data.rain ? data.rain["1h"]+" mm" : "0 mm"}</p>
+    `;
+    document.getElementById(containerId).appendChild(card);
+  } catch (err) {
+    console.error(err);
+  }
+}
 
-    // Traffic data for Maharlika Highway (approx coords)
-    async function fetchTraffic() {
-      const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/json?point=13.963,121.709&unit=KMPH&key=${TOMTOM_KEY}`;
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        document.getElementById("trafficData").innerText = "Failed to load traffic.";
-        return;
-      }
-      const data = await resp.json();
-      const speed = data.flowSegmentData.currentSpeed;
-      const free = data.flowSegmentData.freeFlowSpeed;
-      const jamFactor = data.flowSegmentData.jamFactor;
-      document.getElementById("trafficData").innerHTML = `
-        <p>🚗 Current Speed: ${speed} km/h</p>
-        <p>🛣 Normal Speed: ${free} km/h</p>
-        <p>📊 Congestion Level: ${jamFactor}/10</p>
-      `;
-    }
+// Render all barangays
+for (const [zone, list] of Object.entries(barangays)) {
+  list.forEach(b => fetchWeather(b, zone));
+}
 
-    // Init
-    displayBarangays("west", "west");
-    displayBarangays("center", "center");
-    displayBarangays("east", "east");
-    fetchTraffic();
-  </script>
+// Fetch traffic from TomTom (Maharlika Highway near Pagbilao)
+async function fetchTraffic() {
+  const lat = 13.964, lon = 121.698; // center Pagbilao
+  const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/json?point=${lat},${lon}&unit=KMPH&key=${TOMTOM_KEY}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const speed = data.flowSegmentData.currentSpeed;
+    const freeFlow = data.flowSegmentData.freeFlowSpeed;
+    const congestion = Math.round((1 - speed/freeFlow)*100);
+    document.getElementById("traffic-status").innerText =
+      `Current Speed: ${speed} km/h (Normal: ${freeFlow} km/h) | Congestion: ${congestion}%`;
+  } catch (err) {
+    document.getElementById("traffic-status").innerText = "Traffic data unavailable.";
+  }
+}
+fetchTraffic();
+</script>
+
 </body>
 </html>
