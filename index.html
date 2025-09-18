@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagbilao Weather Forecast</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-sky-50 text-gray-900">
+  <header class="text-center p-6 bg-sky-600 text-white shadow-md">
+    <h1 class="text-2xl font-bold">🌤 Pagbilao, Quezon – Live Weather</h1>
+    <p class="text-sm">Real-time weather by barangay</p>
+  </header>
+
+  <main class="p-4 space-y-8">
+    <section>
+      <h2 class="text-xl font-semibold mb-3">West Barangays</h2>
+      <div id="west" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-3">Center Barangays</h2>
+      <div id="center" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-3">East Barangays</h2>
+      <div id="east" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 p-4">
+    Auto-updates every 10 minutes · Data from OpenWeatherMap
+  </footer>
+
+  <script>
+    const API_KEY = "d77dbc9c66952dae67f86c58ab653dec";
+    const API_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+    // Barangay coordinates
+    const barangays = {
+      "West": [
+        { name: "Añato", lat: 13.9725, lon: 121.7080 },
+        { name: "Alupaye", lat: 13.9850, lon: 121.7200 },
+        { name: "Antipolo", lat: 13.9680, lon: 121.7130 },
+        { name: "Bagumbungan Iba.", lat: 13.9750, lon: 121.7250 },
+        { name: "Bagumbungan Ila.", lat: 13.9780, lon: 121.7320 },
+        { name: "Bantigue", lat: 13.9820, lon: 121.7400 },
+        { name: "Bigo", lat: 13.9700, lon: 121.7020 },
+        { name: "Binahaan", lat: 13.9650, lon: 121.7100 },
+        { name: "Bukal", lat: 13.9800, lon: 121.7480 },
+        { name: "Ikirin", lat: 13.9760, lon: 121.7050 }
+      ],
+      "Center": [
+        { name: "Castillo (Poblacion)", lat: 13.9665, lon: 121.6952 },
+        { name: "Daungan (Poblacion)", lat: 13.9670, lon: 121.6940 },
+        { name: "Del Carmen (Poblacion)", lat: 13.9680, lon: 121.6960 },
+        { name: "Parang (Poblacion)", lat: 13.9690, lon: 121.6930 },
+        { name: "Sta. Catalina (Poblacion)", lat: 13.9675, lon: 121.6920 },
+        { name: "Tambak (Poblacion)", lat: 13.9668, lon: 121.6975 },
+        { name: "Mapagong", lat: 13.9620, lon: 121.6990 },
+        { name: "Pinagbayanan", lat: 13.9610, lon: 121.7005 }
+      ],
+      "East": [
+        { name: "Malicboy Kan.", lat: 13.9550, lon: 121.7500 },
+        { name: "Malicboy Sil.", lat: 13.9540, lon: 121.7550 },
+        { name: "Mayhay", lat: 13.9565, lon: 121.7600 },
+        { name: "Palsabangon Iba.", lat: 13.9500, lon: 121.7700 },
+        { name: "Palsabangon Ila.", lat: 13.9520, lon: 121.7750 },
+        { name: "Talipan", lat: 13.9480, lon: 121.7800 },
+        { name: "Tukalan", lat: 13.9450, lon: 121.7650 },
+        { name: "Polo Iba.", lat: 13.9400, lon: 121.7720 },
+        { name: "Polo Ila.", lat: 13.9420, lon: 121.7780 }
+      ]
+    };
+
+    async function fetchWeather(lat, lon) {
+      const url = `${API_URL}?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+      const res = await fetch(url);
+      return res.json();
+    }
+
+    function createCard(barangay, data) {
+      if (data.cod !== 200) {
+        return `
+          <div class="p-4 bg-white rounded-2xl shadow-md">
+            <h3 class="font-semibold text-lg">${barangay}</h3>
+            <p class="text-red-500 text-sm">Error fetching data</p>
+          </div>
+        `;
+      }
+
+      const temp = data.main.temp.toFixed(1);
+      const desc = data.weather[0].description;
+      const icon = data.weather[0].icon;
+      const updated = new Date().toLocaleTimeString();
+
+      return `
+        <div class="p-4 bg-white rounded-2xl shadow-md">
+          <h3 class="font-semibold text-lg">${barangay}</h3>
+          <div class="flex items-center space-x-2">
+            <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}" class="w-12 h-12">
+            <p class="text-2xl font-bold">${temp}°C</p>
+          </div>
+          <p class="capitalize text-gray-600">${desc}</p>
+          <p class="text-xs text-gray-400">Updated: ${updated}</p>
+        </div>
+      `;
+    }
+
+    async function loadWeather() {
+      for (const [region, list] of Object.entries(barangays)) {
+        const container = document.getElementById(region.toLowerCase());
+        container.innerHTML = "Loading...";
+        const cards = await Promise.all(
+          list.map(async (b) => {
+            const data = await fetchWeather(b.lat, b.lon);
+            return createCard(b.name, data);
+          })
+        );
+        container.innerHTML = cards.join("");
+      }
+    }
+
+    // Load immediately
+    loadWeather();
+
+    // Auto-refresh every 10 minutes
+    setInterval(loadWeather, 10 * 60 * 1000);
+  </script>
+</body>
+</html>
