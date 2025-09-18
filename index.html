@@ -3,165 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <title>Pagbilao Weather & Traffic Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    header { background: #2c3e50; color: white; padding: 1rem; text-align: center; }
-    h2 { margin-top: 1rem; }
-    .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; }
-    .card { background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .traffic, .windy, .pagasa { margin: 1rem; padding: 1rem; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    iframe { width: 100%; border: none; border-radius: 10px; }
-    .video { margin-top: 1rem; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f7fa; }
+    header { background: #0077b6; color: white; padding: 15px; text-align: center; }
+    section { padding: 20px; }
+    h2 { border-bottom: 2px solid #0077b6; padding-bottom: 5px; }
+    .barangay-group { margin-bottom: 20px; }
+    .barangay { background: white; border-radius: 10px; padding: 15px; margin: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .barangay h3 { margin: 0 0 10px; color: #0077b6; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+    iframe { border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Pagbilao Weather & Traffic Dashboard</h1>
+    <p>Barangay Weather • Maharlika Highway Traffic • PAGASA Forecast</p>
+  </header>
 
-<header>
-  <h1>🌦 Pagbilao, Quezon Weather & Traffic Dashboard</h1>
-  <p>Barangay-level Weather | Maharlika Highway Traffic | Windy Map | PAGASA Updates</p>
-</header>
+  <section>
+    <h2>🌦 Weather by Barangay</h2>
+    <div id="weather"></div>
+  </section>
 
-<section class="traffic">
-  <h2>🚗 Traffic (Maharlika Highway)</h2>
-  <p id="traffic-status">Loading traffic data...</p>
-</section>
+  <section>
+    <h2>🚦 Traffic (Maharlika Highway)</h2>
+    <div id="traffic">Loading traffic data...</div>
+  </section>
 
-<h2 style="padding-left:1rem;">🏘 West Barangays</h2>
-<div class="container" id="west"></div>
+  <section>
+    <h2>🌍 Windy Map</h2>
+    <iframe width="100%" height="400" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
+  </section>
 
-<h2 style="padding-left:1rem;">🏙 Poblacion (Center)</h2>
-<div class="container" id="center"></div>
+  <section>
+    <h2>📺 Latest PAGASA Forecast</h2>
+    <div id="pagasa-video">
+      <p>Loading latest PAGASA forecast video...</p>
+    </div>
+  </section>
 
-<h2 style="padding-left:1rem;">🌄 East Barangays</h2>
-<div class="container" id="east"></div>
+  <script>
+    // OpenWeatherMap Setup
+    const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
+    const barangays = [
+      "Añato","Alupaye","Antipolo","Bagumbungan Iba.","Bagumbungan Ila.","Bantigue","Bigo","Binahaan","Bukal",
+      "Castillo (Poblacion)","Daungan (Poblacion)","Del Carmen (Poblacion)","Ikirin",
+      "Malicboy Kan.","Malicboy Sil.","Mapagong","Mayhay","Palsabangon Iba.","Palsabangon Ila.",
+      "Parang (Poblacion)","Pinagbayanan","Polo Iba.","Polo Ila.","Sta. Catalina (Poblacion)",
+      "Talipan","Tambak (Poblacion)","Tukalan"
+    ];
 
-<section class="windy">
-  <h2>🌍 Windy Map</h2>
-  <iframe height="400"
-    src="https://embed.windy.com/embed2.html?key=iiOFIctYLRkwVoxFHqG4npNTG1X1qYQ2&lat=13.972&lon=121.687&zoom=16&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&detailLat=13.969&detailLon=121.687&metricWind=default&metricTemp=default&radarRange=-1">
-  </iframe>
-</section>
-
-<section class="pagasa">
-  <h2>📺 Latest PAGASA Weather Video</h2>
-  <div id="pagasa-video">Loading latest PAGASA update...</div>
-</section>
-
-<script>
-const OPENWEATHER_KEY = "d77dbc9c66952dae67f86c58ab653dec";
-const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
-
-// Barangays grouped
-const barangays = {
-  west: [
-    {name:"Añato", lat:13.9350, lon:121.6700},
-    {name:"Alupaye", lat:13.9400, lon:121.6600},
-    {name:"Antipolo", lat:13.9500, lon:121.6550},
-    {name:"Bagumbungan Iba.", lat:13.9450, lon:121.6450},
-    {name:"Bagumbungan Ila.", lat:13.9500, lon:121.6400},
-    {name:"Bantigue", lat:13.9550, lon:121.6350},
-    {name:"Bigo", lat:13.9600, lon:121.6300},
-    {name:"Binahaan", lat:13.9650, lon:121.6250},
-    {name:"Bukal", lat:13.9700, lon:121.6200},
-    {name:"Ikirin", lat:13.9750, lon:121.6150}
-  ],
-  center: [
-    {name:"Castillo (Poblacion)", lat:13.964, lon:121.698},
-    {name:"Daungan (Poblacion)", lat:13.965, lon:121.699},
-    {name:"Del Carmen (Poblacion)", lat:13.966, lon:121.700},
-    {name:"Parang (Poblacion)", lat:13.967, lon:121.701},
-    {name:"Sta. Catalina (Poblacion)", lat:13.968, lon:121.702},
-    {name:"Tambak (Poblacion)", lat:13.969, lon:121.703},
-    {name:"Mapagong", lat:13.970, lon:121.704},
-    {name:"Pinagbayanan", lat:13.971, lon:121.705}
-  ],
-  east: [
-    {name:"Malicboy Kan.", lat:13.980, lon:121.710},
-    {name:"Malicboy Sil.", lat:13.981, lon:121.715},
-    {name:"Mayhay", lat:13.982, lon:121.720},
-    {name:"Palsabangon Iba.", lat:13.983, lon:121.725},
-    {name:"Palsabangon Ila.", lat:13.984, lon:121.730},
-    {name:"Talipan", lat:13.985, lon:121.735},
-    {name:"Tukalan", lat:13.986, lon:121.740},
-    {name:"Polo Iba.", lat:13.987, lon:121.745},
-    {name:"Polo Ila.", lat:13.988, lon:121.750}
-  ]
-};
-
-// Fetch weather for each barangay
-async function fetchWeather(barangay, containerId) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${barangay.lat}&lon=${barangay.lon}&appid=${OPENWEATHER_KEY}&units=metric`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <h3>${barangay.name}</h3>
-      <p>🌡 Temp: ${data.main.temp} °C</p>
-      <p>💧 Humidity: ${data.main.humidity}%</p>
-      <p>🌬 Wind: ${data.wind.speed} m/s</p>
-      <p>☁ Clouds: ${data.clouds.all}%</p>
-      <p>🌧 Rain: ${data.rain ? data.rain["1h"]+" mm" : "0 mm"}</p>
-    `;
-    document.getElementById(containerId).appendChild(card);
-  } catch (err) {
-    console.error(err);
-  }
-}
-for (const [zone, list] of Object.entries(barangays)) {
-  list.forEach(b => fetchWeather(b, zone));
-}
-
-// Fetch traffic from TomTom (Maharlika Highway near Pagbilao)
-async function fetchTraffic() {
-  const lat = 13.964, lon = 121.698;
-  const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/json?point=${lat},${lon}&unit=KMPH&key=${TOMTOM_KEY}`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const speed = data.flowSegmentData.currentSpeed;
-    const freeFlow = data.flowSegmentData.freeFlowSpeed;
-    const congestion = Math.round((1 - speed/freeFlow)*100);
-    document.getElementById("traffic-status").innerText =
-      `Current Speed: ${speed} km/h (Normal: ${freeFlow} km/h) | Congestion: ${congestion}%`;
-  } catch (err) {
-    document.getElementById("traffic-status").innerText = "Traffic data unavailable.";
-  }
-}
-fetchTraffic();
-
-// Fetch latest PAGASA YouTube video
-const YT_KEY = "YOUR_API_KEY";  // replace with your YouTube API key
-const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g";
-
-async function getLatestVideo() {
-  const url = `https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&maxResults=1&type=video`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.items && data.items.length > 0) {
-      const video = data.items[0];
-      const videoId = video.id.videoId;
-      const title = video.snippet.title;
-      const published = new Date(video.snippet.publishedAt).toLocaleString();
-      document.getElementById("pagasa-video").innerHTML = `
-        <h3>${title}</h3>
-        <p>📅 Published: ${published}</p>
-        <div class="video">
-          <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
-        </div>
-      `;
-    } else {
-      document.getElementById("pagasa-video").innerText = "No video found.";
+    async function fetchWeather(barangay) {
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(barangay)},Pagbilao,PH&units=metric&appid=${OWM_KEY}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.cod === 200) {
+          return `
+            <div class="barangay">
+              <h3>${barangay}</h3>
+              <p>🌡 Temp: ${data.main.temp}°C (feels like ${data.main.feels_like}°C)</p>
+              <p>💧 Humidity: ${data.main.humidity}%</p>
+              <p>💨 Wind: ${data.wind.speed} m/s</p>
+              <p>☁️ Clouds: ${data.clouds.all}%</p>
+              <p>🌧 Rain chance: ${(data.rain ? data.rain["1h"] : 0)} mm (last 1h)</p>
+            </div>
+          `;
+        } else {
+          return `<div class="barangay"><h3>${barangay}</h3><p>⚠️ Weather data not available</p></div>`;
+        }
+      } catch (err) {
+        return `<div class="barangay"><h3>${barangay}</h3><p>❌ Error fetching data</p></div>`;
+      }
     }
-  } catch (err) {
-    document.getElementById("pagasa-video").innerText = "Error loading PAGASA video.";
-  }
-}
-getLatestVideo();
-</script>
 
+    async function loadWeather() {
+      const container = document.getElementById("weather");
+      container.innerHTML = "<p>Loading weather data...</p>";
+      const results = await Promise.all(barangays.map(fetchWeather));
+      container.innerHTML = `<div class="cards">${results.join("")}</div>`;
+    }
+
+    loadWeather();
+
+    // TomTom Traffic API
+    const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
+    async function loadTraffic() {
+      const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=13.972,121.687&unit=KMPH&key=${TOMTOM_KEY}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.flowSegmentData) {
+          const current = data.flowSegmentData.currentSpeed;
+          const free = data.flowSegmentData.freeFlowSpeed;
+          const conf = data.flowSegmentData.confidence * 100;
+          document.getElementById("traffic").innerHTML = `
+            <p>🚗 Current Speed: ${current} km/h</p>
+            <p>🛣 Normal Speed: ${free} km/h</p>
+            <p>📊 Confidence: ${conf.toFixed(0)}%</p>
+          `;
+        } else {
+          document.getElementById("traffic").innerText = "⚠️ No traffic data available.";
+        }
+      } catch (err) {
+        document.getElementById("traffic").innerText = "❌ Error fetching traffic data.";
+      }
+    }
+
+    loadTraffic();
+
+    // YouTube API for PAGASA
+    const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
+    const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g";
+
+    async function loadPagasaVideo() {
+      try {
+        let url = `https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&maxResults=1&type=video`;
+        let res = await fetch(url);
+        let data = await res.json();
+
+        if (!data.items || data.items.length === 0) {
+          url = `https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${CHANNEL_ID}&part=snippet&eventType=live&type=video`;
+          res = await fetch(url);
+          data = await res.json();
+        }
+
+        if (data.items && data.items.length > 0) {
+          const video = data.items[0];
+          const videoId = video.id.videoId;
+          const title = video.snippet.title;
+          const published = new Date(video.snippet.publishedAt).toLocaleString();
+
+          document.getElementById("pagasa-video").innerHTML = `
+            <h3>${title}</h3>
+            <p>📅 Published: ${published}</p>
+            <iframe width="100%" height="315"
+              src="https://www.youtube.com/embed/${videoId}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+          `;
+        } else {
+          document.getElementById("pagasa-video").innerText = "No recent PAGASA forecast video found.";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("pagasa-video").innerText = "Error loading PAGASA video.";
+      }
+    }
+
+    loadPagasaVideo();
+  </script>
 </body>
 </html>
