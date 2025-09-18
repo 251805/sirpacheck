@@ -10,15 +10,16 @@
     h2 { margin-top: 1rem; }
     .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; }
     .card { background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .traffic, .windy { margin: 1rem; padding: 1rem; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    iframe { width: 100%; height: 400px; border: none; border-radius: 10px; }
+    .traffic, .windy, .pagasa { margin: 1rem; padding: 1rem; background: white; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    iframe { width: 100%; border: none; border-radius: 10px; }
+    .video { margin-top: 1rem; }
   </style>
 </head>
 <body>
 
 <header>
   <h1>🌦 Pagbilao, Quezon Weather & Traffic Dashboard</h1>
-  <p>Barangay-level Weather | Maharlika Highway Traffic | Windy Map</p>
+  <p>Barangay-level Weather | Maharlika Highway Traffic | Windy Map | PAGASA Updates</p>
 </header>
 
 <section class="traffic">
@@ -37,7 +38,14 @@
 
 <section class="windy">
   <h2>🌍 Windy Map</h2>
-  <iframe src="https://embed.windy.com/embed2.html?key=iiOFIctYLRkwVoxFHqG4npNTG1X1qYQ2&lat=13.964&lon=121.698&zoom=10"></iframe>
+  <iframe height="400"
+    src="https://embed.windy.com/embed2.html?key=iiOFIctYLRkwVoxFHqG4npNTG1X1qYQ2&lat=13.972&lon=121.687&zoom=16&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&detailLat=13.969&detailLon=121.687&metricWind=default&metricTemp=default&radarRange=-1">
+  </iframe>
+</section>
+
+<section class="pagasa">
+  <h2>📺 Latest PAGASA Weather Video</h2>
+  <div id="pagasa-video">Loading latest PAGASA update...</div>
 </section>
 
 <script>
@@ -102,15 +110,13 @@ async function fetchWeather(barangay, containerId) {
     console.error(err);
   }
 }
-
-// Render all barangays
 for (const [zone, list] of Object.entries(barangays)) {
   list.forEach(b => fetchWeather(b, zone));
 }
 
 // Fetch traffic from TomTom (Maharlika Highway near Pagbilao)
 async function fetchTraffic() {
-  const lat = 13.964, lon = 121.698; // center Pagbilao
+  const lat = 13.964, lon = 121.698;
   const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/relative0/json?point=${lat},${lon}&unit=KMPH&key=${TOMTOM_KEY}`;
   try {
     const res = await fetch(url);
@@ -125,6 +131,36 @@ async function fetchTraffic() {
   }
 }
 fetchTraffic();
+
+// Fetch latest PAGASA YouTube video
+const YT_KEY = "YOUR_API_KEY";  // replace with your YouTube API key
+const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g";
+
+async function getLatestVideo() {
+  const url = `https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&maxResults=1&type=video`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.items && data.items.length > 0) {
+      const video = data.items[0];
+      const videoId = video.id.videoId;
+      const title = video.snippet.title;
+      const published = new Date(video.snippet.publishedAt).toLocaleString();
+      document.getElementById("pagasa-video").innerHTML = `
+        <h3>${title}</h3>
+        <p>📅 Published: ${published}</p>
+        <div class="video">
+          <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+        </div>
+      `;
+    } else {
+      document.getElementById("pagasa-video").innerText = "No video found.";
+    }
+  } catch (err) {
+    document.getElementById("pagasa-video").innerText = "Error loading PAGASA video.";
+  }
+}
+getLatestVideo();
 </script>
 
 </body>
