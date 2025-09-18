@@ -2,27 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pagbilao Weather + Traffic Dashboard</title>
+  <title>Pagbilao Weather & Traffic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌤️ Pagbilao, Quezon Weather + Traffic</h1>
+  <header>
+    <h1>🌦 Pagbilao, Quezon — Weather & Traffic Dashboard</h1>
+    <p>Live updates for all barangays (Weather: OpenWeather | Traffic: TomTom | Alerts: PAGASA)</p>
+  </header>
 
-  <section id="alerts">
-    <h2>⚠️ PAGASA Advisories</h2>
-    <div id="pagasa-alerts">Loading advisories...</div>
-  </section>
+  <main>
+    <section id="alerts">
+      <h2>⚠ PAGASA Alerts</h2>
+      <div id="pagasa-alerts">Loading alerts...</div>
+    </section>
 
-  <section id="dashboard">
-    <h2>West Barangays</h2>
-    <div class="barangay-group" id="west"></div>
+    <section id="west">
+      <h2>West Pagbilao</h2>
+      <div class="barangay-grid" id="west-barangays"></div>
+    </section>
 
-    <h2>Center Barangays</h2>
-    <div class="barangay-group" id="center"></div>
+    <section id="center">
+      <h2>Center Pagbilao</h2>
+      <div class="barangay-grid" id="center-barangays"></div>
+    </section>
 
-    <h2>East Barangays</h2>
-    <div class="barangay-group" id="east"></div>
-  </section>
+    <section id="east">
+      <h2>East Pagbilao</h2>
+      <div class="barangay-grid" id="east-barangays"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Powered by OpenWeather, TomTom, PAGASA | Hosted on GitHub Pages</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
