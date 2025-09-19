@@ -84,6 +84,27 @@
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+    /* Hotline Marquee */
+    #hotline {
+      background: #cc0000;
+      color: white;
+      padding: 0.5rem;
+      font-weight: bold;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    #hotline span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-left 25s linear infinite;
+    }
+    @keyframes scroll-left {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
   </style>
 </head>
 <body>
@@ -118,17 +139,19 @@
     <p>Loading latest PAGASA forecast video...</p>
   </div>
 
+  <!-- Hotline Marquee -->
+  <div id="hotline">
+    <span>📞 HOTLINES — MDRRMO: 09186244564 | 🚒 BUMBERO: 09234424945 | 👮 PULIS: 09985985764 | 🏛 LGU PAGBILAO: (042) 797-0937</span>
+  </div>
+
   <script>
   const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
   const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
   const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; 
-  const TIDE_API = "0fb5e258-9500-11f0-9010-0242ac130006-0fb5e384-9500-11f0-9010-0242ac130006";
+  const TIDE_API = "YOUR_WORLDTIDES_KEY"; // ⚠️ Replace with valid WorldTides API key
 
-  // Pagbilao coordinates
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
-
-  // Coastal barangays
   const coastalBarangays = ["Bantigue", "Pinagbayanan", "Daungan (Poblacion)", "Polo Iba.", "Polo Ila."];
 
   const barangays = [
@@ -161,7 +184,6 @@
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
-  // Fetch weather
   async function fetchWeather(lat, lon) {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
     try {
@@ -183,7 +205,6 @@
     }
   }
 
-  // Fetch tide data (demo API)
   async function fetchTide() {
     const url = `https://www.worldtides.info/api/v2?heights&extremes&lat=${PAGBILAO_LAT}&lon=${PAGBILAO_LON}&days=5&key=${TIDE_API}`;
     try {
@@ -269,8 +290,6 @@
   loadWeather();
   loadTraffic();
   loadPagasaVideo();
-
-  // Auto-refresh every 4 hours
   setInterval(() => { loadSummary(); loadWeather(); }, 4 * 60 * 60 * 1000);
   </script>
 </body>
