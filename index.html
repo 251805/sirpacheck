@@ -76,7 +76,7 @@
     }
     footer {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       background: #0066cc;
       padding: 0.5rem 1rem;
@@ -98,27 +98,29 @@
     <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.jpg" alt="Right Logo">
   </header>
 
-  <h2>🌍 Pagbilao, Quezon</h2>
+  <h2>🌍 Pagbilao, Quezon (Summary Weather)</h2>
   <div id="summary">Loading summary weather...</div>
 
   <h2>📍 Weather by Barangay</h2>
   <div id="weather">Loading weather...</div>
 
-  <h2>🚗 Traffic (Maharlika Highway)</h2>
+  <h2>🌊 Tide Levels (Coastal Barangays)</h2>
+  <div id="tide">Loading tide info...</div>
+
+  <h2>🚗 Traffic (Maharlika Highway) 🚗</h2>
   <div id="traffic">Loading traffic data...</div>
 
-  <h2>🌬 Windy Map</h2>
+  <h2>🌬 Windy Map 🌬</h2>
   <div id="windy">
-    <iframe width="100%" height="800" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&zoom=12&level=surface&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=13.972&detailLon=121.687&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
+    <iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&zoom=12&level=surface&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=13.972&detailLon=121.687&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
   </div>
 
-  <h2>📺 Latest PAGASA Forecast Video</h2>
+  <h2>📺 Latest PAGASA Forecast Video 📺</h2>
   <div id="pagasa-video">
     <p>Loading latest PAGASA forecast video...</p>
   </div>
 
   <footer>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/hotline.jpg" alt="Hotline">
     <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="PAG Logo">
   </footer>
 
@@ -126,24 +128,26 @@
   const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
   const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
-  const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; // PAGASA official channel
+  const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; // PAGASA channel
+  const TIDE_KEY = "demo"; // replace with WorldTides.org API key
 
-  // Pagbilao central coordinates
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
 
-  // Barangay coordinates
   const barangays = [
+    { name: "Bantigue", lat: 13.9396, lon: 121.6944, coastal: true },
+    { name: "Daungan (Poblacion)", lat: 13.9683, lon: 121.6888, coastal: true },
+    { name: "Pinagbayanan", lat: 13.9690, lon: 121.7016, coastal: true },
+    { name: "Polo Iba.", lat: 13.9055, lon: 121.7496, coastal: true },
+    { name: "Polo Ila.", lat: 13.9313, lon: 121.7753, coastal: true },
     { name: "Añato", lat: 14.0042, lon: 121.6572 },
     { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
     { name: "Antipolo", lat: 13.9868, lon: 121.6648 },
     { name: "Bagumbungan Iba.", lat: 13.9995, lon: 121.6894 },
     { name: "Bagumbungan Ila.", lat: 14.0257, lon: 121.6942 },
-    { name: "Bantigue", lat: 13.9396, lon: 121.6944 },
     { name: "Bigo", lat: 13.9948, lon: 121.6485 },
     { name: "Binahaan", lat: 13.9898, lon: 121.7579 },
     { name: "Bukal", lat: 13.9728, lon: 121.6800 },
     { name: "Castillo (Poblacion)", lat: 13.9711, lon: 121.6831 },
-    { name: "Daungan (Poblacion)", lat: 13.9683, lon: 121.6888 },
     { name: "Del Carmen (Poblacion)", lat: 13.9685, lon: 121.6856 },
     { name: "Ikirin", lat: 13.9872, lon: 121.6900 },
     { name: "Malicboy Kan.", lat: 13.9689, lon: 121.7685 },
@@ -153,16 +157,12 @@
     { name: "Palsabangon Iba.", lat: 13.9893, lon: 121.7371 },
     { name: "Palsabangon Ila.", lat: 14.0211, lon: 121.7242 },
     { name: "Parang (Poblacion)", lat: 13.9710, lon: 121.6897 },
-    { name: "Pinagbayanan", lat: 13.9690, lon: 121.7016 },
-    { name: "Polo Iba.", lat: 13.9055, lon: 121.7496 },
-    { name: "Polo Ila.", lat: 13.9313, lon: 121.7753 },
     { name: "Sta. Catalina (Poblacion)", lat: 13.9711, lon: 121.6868 },
     { name: "Talipan", lat: 13.9628, lon: 121.6537 },
     { name: "Tambak (Poblacion)", lat: 13.9729, lon: 121.6884 },
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
-  // Fetch weather
   async function fetchWeather(lat, lon) {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
     try {
@@ -184,6 +184,22 @@
     }
   }
 
+  async function fetchTide(lat, lon) {
+    const url = `https://www.worldtides.info/api/v3?heights&lat=${lat}&lon=${lon}&key=${TIDE_KEY}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.heights && data.heights.length > 0) {
+        const tide = data.heights[0].height;
+        return `<p>🌊 Tide: ${tide.toFixed(2)} m</p>`;
+      } else {
+        return `<p>⚠️ Tide data unavailable</p>`;
+      }
+    } catch (e) {
+      return `<p>❌ Error fetching tide</p>`;
+    }
+  }
+
   async function loadSummary() {
     document.getElementById("summary").innerHTML = await fetchWeather(PAGBILAO_LAT, PAGBILAO_LON);
   }
@@ -193,7 +209,8 @@
     container.innerHTML = "";
     const results = await Promise.all(barangays.map(async b => {
       const w = await fetchWeather(b.lat, b.lon);
-      return `<div class="barangay-card"><h3>${b.name}</h3>${w}</div>`;
+      const tide = b.coastal ? await fetchTide(b.lat, b.lon) : "";
+      return `<div class="barangay-card"><h3>${b.name}</h3>${w}${tide}</div>`;
     }));
     container.innerHTML = results.join("");
   }
@@ -231,7 +248,7 @@
         document.getElementById("pagasa-video").innerHTML = `
           <h3>${title}</h3>
           <p>📅 Published: ${published}</p>
-          <iframe width="532" height="250"
+          <iframe width="100%" height="400"
             src="https://www.youtube.com/embed/${videoId}"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -253,5 +270,3 @@
   </script>
 </body>
 </html>
-
-
