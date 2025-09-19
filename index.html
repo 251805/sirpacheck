@@ -157,7 +157,7 @@
   const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
   const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
-  const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; 
+  const CHANNEL_ID = "UC0s0vJ4ZjDCyDJVZle14RTA"; // Official PAGASA channel
 
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
 
@@ -279,11 +279,13 @@
         document.getElementById("pagasa-video").innerHTML = `
           <h3>${title}</h3>
           <p>📅 Published: ${published}</p>
-          <iframe width="75%" height="75%"
+          <iframe width="75%" height="500"
             src="https://www.youtube.com/embed/${videoId}"
             frameborder="0" allowfullscreen>
           </iframe>
         `;
+      } else {
+        document.getElementById("pagasa-video").innerText = "⚠️ No recent PAGASA videos found.";
       }
     } catch {
       document.getElementById("pagasa-video").innerText = "❌ Error loading PAGASA video.";
@@ -298,6 +300,3 @@
   </script>
 </body>
 </html>
-
-
-
