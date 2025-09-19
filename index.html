@@ -93,11 +93,11 @@
       <h1>🌦 MDRRMO & PCC Weather, Traffic & Tide Dashboard 🌊</h1>
       <p>Barangay Weather • Traffic • PAGASA • Tide Updates</p>
     </div>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.jpg" alt="Right Logo">
+    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.png" alt="Right Logo">
   </header>
 
   <h2>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="Pagbilao Logo">
+    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" style="height:60px;vertical-align:middle;"> 
     Pagbilao, Quezon Summary
   </h2>
   <div id="summary">Loading summary weather & tide...</div>
@@ -123,6 +123,7 @@
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
   const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
   const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; 
+  const TIDE_API = "0fb5e258-9500-11f0-9010-0242ac130006-0fb5e384-9500-11f0-9010-0242ac130006";
 
   // Pagbilao coordinates
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
@@ -160,7 +161,7 @@
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
-  // Weather fetch
+  // Fetch weather
   async function fetchWeather(lat, lon) {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
     try {
@@ -182,13 +183,24 @@
     }
   }
 
-  // Dummy tide fetch (replace with real tide API if available)
+  // Fetch tide data (demo API)
   async function fetchTide() {
-    return `
-      <p>🌊 High Tide: 1.8m at 03:20 AM</p>
-      <p>🌊 Low Tide: 0.3m at 10:45 AM</p>
-      <p>Next 5 days: <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a></p>
-    `;
+    const url = `https://www.worldtides.info/api/v2?heights&extremes&lat=${PAGBILAO_LAT}&lon=${PAGBILAO_LON}&days=5&key=${TIDE_API}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.extremes) {
+        let tides = data.extremes.slice(0, 6).map(t => {
+          let time = new Date(t.dt * 1000).toLocaleString();
+          return `<p>🌊 ${t.type}: ${t.height.toFixed(2)}m at ${time}</p>`;
+        }).join("");
+        return tides + `<p><a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">📊 View full tide chart</a></p>`;
+      } else {
+        return `<p>⚠️ Tide data unavailable</p>`;
+      }
+    } catch {
+      return `<p>❌ Error fetching tide data</p>`;
+    }
   }
 
   async function loadSummary() {
@@ -204,7 +216,7 @@
       const w = await fetchWeather(b.lat, b.lon);
       let tideInfo = "";
       if (coastalBarangays.includes(b.name)) {
-        tideInfo = `<div class="tide-info">🌊 Tide info available for coastal area</div>`;
+        tideInfo = `<div class="tide-info">🌊 Tide info: See Pagbilao summary</div>`;
       }
       return `<div class="barangay-card"><h3>${b.name}</h3>${w}${tideInfo}</div>`;
     }));
@@ -212,7 +224,7 @@
   }
 
   async function loadTraffic() {
-    const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=13.972,121.687&key=${TOMTOM_KEY}`;
+    const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${PAGBILAO_LAT},${PAGBILAO_LON}&key=${TOMTOM_KEY}`;
     try {
       const res = await fetch(url);
       const data = await res.json();
@@ -257,6 +269,7 @@
   loadWeather();
   loadTraffic();
   loadPagasaVideo();
+
   // Auto-refresh every 4 hours
   setInterval(() => { loadSummary(); loadWeather(); }, 4 * 60 * 60 * 1000);
   </script>
