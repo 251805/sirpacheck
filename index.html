@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pagbilao Weather & Traffic Dashboard</title>
+  <title>MDRRMO & PCC Weather & Traffic Dashboard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,6 +20,13 @@
     h2 {
       margin-top: 2rem;
       color: #333;
+    }
+    #summary, #traffic, #windy, #pagasa-video {
+      padding: 1rem;
+      margin: 1rem;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     #weather {
       display: grid;
@@ -40,13 +47,6 @@
     iframe {
       border-radius: 10px;
     }
-    #traffic, #windy, #pagasa-video {
-      padding: 1rem;
-      margin: 1rem;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
   </style>
 </head>
 <body>
@@ -54,6 +54,9 @@
     <h1>🌦 Pagbilao Weather & Traffic Dashboard</h1>
     <p>Barangay-level Weather • Traffic on Maharlika Highway • PAGASA Updates</p>
   </header>
+
+  <h2>🌍 Pagbilao, Quezon (Summary)</h2>
+  <div id="summary">Loading summary weather for Pagbilao...</div>
 
   <h2>📍 Weather by Barangay</h2>
   <div id="weather">Loading weather...</div>
@@ -108,6 +111,29 @@
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
+  // Fetch summary for Pagbilao
+  async function loadSummary() {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=13.972&lon=121.687&units=metric&appid=${OWM_KEY}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.cod === 200) {
+        document.getElementById("summary").innerHTML = `
+          <p><b>${data.weather[0].description.toUpperCase()}</b></p>
+          <p>🌡 Temp: ${data.main.temp}°C (Feels like ${data.main.feels_like}°C)</p>
+          <p>💧 Humidity: ${data.main.humidity}%</p>
+          <p>💨 Wind: ${data.wind.speed} m/s</p>
+          <p>☁️ Clouds: ${data.clouds.all}%</p>
+          <p>🌧 Rain (1h): ${(data.rain ? data.rain["1h"] : 0)} mm</p>
+        `;
+      } else {
+        document.getElementById("summary").innerText = "⚠️ Summary weather unavailable.";
+      }
+    } catch (e) {
+      document.getElementById("summary").innerText = "❌ Error fetching summary weather.";
+    }
+  }
+
   // Fetch weather per barangay
   async function fetchWeather(lat, lon) {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
@@ -140,7 +166,7 @@
     container.innerHTML = results.join("");
   }
 
-  // Fetch traffic (TomTom, Maharlika Highway bounding box)
+  // Fetch traffic
   async function loadTraffic() {
     const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=13.972,121.687&key=${TOMTOM_KEY}`;
     try {
@@ -193,6 +219,7 @@
   }
 
   // Initialize
+  loadSummary();
   loadWeather();
   loadTraffic();
   loadPagasaVideo();
