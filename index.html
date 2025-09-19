@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDRRMO & PCC Weather & Traffic Dashboard</title>
+  <title>MDRRMO & PCC Weather, Traffic & Tide Dashboard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,6 +48,11 @@
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+    #summary img {
+      height: 70px;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
     #weather {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -64,6 +69,11 @@
       margin: 0 0 0.5rem 0;
       color: #0066cc;
     }
+    .tide-info {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #444;
+    }
     iframe {
       border-radius: 10px;
     }
@@ -74,64 +84,52 @@
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0066cc;
-      padding: 0.5rem 1rem;
-      margin-top: 2rem;
-    }
-    footer img {
-      height: 60px;
-      width: auto;
-    }
   </style>
 </head>
 <body>
   <header>
     <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/NEW%20Pagbilao%20Command%20Logo.png" alt="Left Logo">
     <div class="title">
-      <h1>🌦 Pagbilao Weather & Traffic Dashboard</h1>
-      <p>Barangay-level Weather • Traffic on Maharlika Highway • PAGASA Updates</p>
+      <h1>🌦 MDRRMO & PCC Weather, Traffic & Tide Dashboard 🌊</h1>
+      <p>Barangay Weather • Traffic • PAGASA • Tide Updates</p>
     </div>
     <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.jpg" alt="Right Logo">
   </header>
 
-  <h2>🌍 Pagbilao, Quezon (Municipal Summary)</h2>
-  <div id="summary">Loading summary weather...</div>
+  <h2>
+    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="Pagbilao Logo">
+    Pagbilao, Quezon Summary
+  </h2>
+  <div id="summary">Loading summary weather & tide...</div>
 
   <h2>📍 Weather by Barangay</h2>
   <div id="weather">Loading weather...</div>
 
-  <h2>🚗 Traffic (Maharlika Highway)</h2>
+  <h2>🚗 Traffic (Maharlika Highway) 🚗</h2>
   <div id="traffic">Loading traffic data...</div>
 
-  <h2>🌬 Windy Map</h2>
+  <h2>🌬 Windy Map 🌬</h2>
   <div id="windy">
-    <iframe width="100%" height="400" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&zoom=12&level=surface&overlay=wind&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=13.972&detailLon=121.687&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
+    <iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&zoom=12&level=surface&overlay=wind" frameborder="0"></iframe>
   </div>
 
-  <h2>📺 Latest PAGASA Forecast Video</h2>
+  <h2>📺 Latest PAGASA Forecast Video 📺</h2>
   <div id="pagasa-video">
     <p>Loading latest PAGASA forecast video...</p>
   </div>
-
-  <footer>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/hotline.jpg" alt="Hotline">
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="PAG Logo">
-  </footer>
 
   <script>
   const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
   const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
-  const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; // PAGASA official channel
+  const CHANNEL_ID = "UCpyLikj1x70S8UPxVqsPr6g"; 
 
-  // Pagbilao central coordinates
+  // Pagbilao coordinates
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
 
-  // Barangay coordinates
+  // Coastal barangays
+  const coastalBarangays = ["Bantigue", "Pinagbayanan", "Daungan (Poblacion)", "Polo Iba.", "Polo Ila."];
+
   const barangays = [
     { name: "Añato", lat: 14.0042, lon: 121.6572 },
     { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
@@ -162,7 +160,7 @@
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
-  // Fetch weather
+  // Weather fetch
   async function fetchWeather(lat, lon) {
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
     try {
@@ -179,13 +177,24 @@
       } else {
         return `<p>⚠️ Weather not available</p>`;
       }
-    } catch (e) {
+    } catch {
       return `<p>❌ Error fetching weather</p>`;
     }
   }
 
+  // Dummy tide fetch (replace with real tide API if available)
+  async function fetchTide() {
+    return `
+      <p>🌊 High Tide: 1.8m at 03:20 AM</p>
+      <p>🌊 Low Tide: 0.3m at 10:45 AM</p>
+      <p>Next 5 days: <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a></p>
+    `;
+  }
+
   async function loadSummary() {
-    document.getElementById("summary").innerHTML = await fetchWeather(PAGBILAO_LAT, PAGBILAO_LON);
+    const weather = await fetchWeather(PAGBILAO_LAT, PAGBILAO_LON);
+    const tide = await fetchTide();
+    document.getElementById("summary").innerHTML = weather + tide;
   }
 
   async function loadWeather() {
@@ -193,7 +202,11 @@
     container.innerHTML = "";
     const results = await Promise.all(barangays.map(async b => {
       const w = await fetchWeather(b.lat, b.lon);
-      return `<div class="barangay-card"><h3>${b.name}</h3>${w}</div>`;
+      let tideInfo = "";
+      if (coastalBarangays.includes(b.name)) {
+        tideInfo = `<div class="tide-info">🌊 Tide info available for coastal area</div>`;
+      }
+      return `<div class="barangay-card"><h3>${b.name}</h3>${w}${tideInfo}</div>`;
     }));
     container.innerHTML = results.join("");
   }
@@ -204,16 +217,14 @@
       const res = await fetch(url);
       const data = await res.json();
       if (data.flowSegmentData) {
-        const current = data.flowSegmentData.currentSpeed;
-        const free = data.flowSegmentData.freeFlowSpeed;
         document.getElementById("traffic").innerHTML = `
-          <p>🚙 Current Speed: ${current} km/h</p>
-          <p>🛣 Free Flow Speed: ${free} km/h</p>
+          <p>🚙 Current Speed: ${data.flowSegmentData.currentSpeed} km/h</p>
+          <p>🛣 Free Flow: ${data.flowSegmentData.freeFlowSpeed} km/h</p>
         `;
       } else {
         document.getElementById("traffic").innerText = "⚠️ Traffic data unavailable.";
       }
-    } catch (e) {
+    } catch {
       document.getElementById("traffic").innerText = "❌ Error loading traffic.";
     }
   }
@@ -231,17 +242,13 @@
         document.getElementById("pagasa-video").innerHTML = `
           <h3>${title}</h3>
           <p>📅 Published: ${published}</p>
-          <iframe width="532" height="250"
+          <iframe width="100%" height="350"
             src="https://www.youtube.com/embed/${videoId}"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen>
+            frameborder="0" allowfullscreen>
           </iframe>
         `;
-      } else {
-        document.getElementById("pagasa-video").innerText = "⚠️ No recent PAGASA video found.";
       }
-    } catch (err) {
+    } catch {
       document.getElementById("pagasa-video").innerText = "❌ Error loading PAGASA video.";
     }
   }
@@ -250,6 +257,8 @@
   loadWeather();
   loadTraffic();
   loadPagasaVideo();
+  // Auto-refresh every 4 hours
+  setInterval(() => { loadSummary(); loadWeather(); }, 4 * 60 * 60 * 1000);
   </script>
 </body>
 </html>
