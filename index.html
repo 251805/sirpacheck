@@ -19,33 +19,16 @@
       color: white;
       padding: 1rem;
     }
-    header img {
-      height: 60px;
-      width: auto;
-    }
-    header .title {
-      text-align: center;
-      flex-grow: 1;
-    }
-    header .title h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-    header .title p {
-      margin: 0;
-      font-size: 0.9rem;
-    }
+    header img { height: 60px; width: auto; }
+    header .title { text-align: center; flex-grow: 1; }
+    header .title h1 { margin: 0; font-size: 1.8rem; }
+    header .title p { margin: 0; font-size: 0.9rem; }
     h2 {
       margin-top: 2rem;
       color: #333;
       text-align: center;
     }
-    h2 img {
-      height: 50px;
-      width: auto;
-      vertical-align: middle;
-      margin-right: 10px;
-    }
+    h2 img { height: 50px; vertical-align: middle; margin-right: 10px; }
     #summary {
       text-align: center;
       margin: 1rem;
@@ -53,11 +36,6 @@
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    #summary img {
-      height: 70px;
-      display: block;
-      margin: 0 auto 10px auto;
     }
     #weather {
       display: grid;
@@ -71,10 +49,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 1rem;
     }
-    .barangay-card h3 {
-      margin: 0 0 0.5rem 0;
-      color: #0066cc;
-    }
+    .barangay-card h3 { margin: 0 0 0.5rem; color: #0066cc; }
     .tide-info {
       margin-top: 0.5rem;
       font-size: 0.9rem;
@@ -83,16 +58,31 @@
       padding: 0.5rem;
       border-radius: 6px;
     }
-    iframe {
-      border-radius: 10px;
-    }
-    #traffic, #windy, #pagasa-video {
+    iframe { border-radius: 10px; }
+    #traffic {
       padding: 1rem;
       margin: 1rem;
       background: white;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
+    /* Side-by-side layout */
+    .map-sat-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    #windy, #himawari {
+      flex: 1;
+      min-width: 350px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+    }
+
     /* Hotline Marquee */
     #hotline {
       background: #cc0000;
@@ -114,6 +104,48 @@
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
+
+    /* Himawari Timelapse */
+    #satellite-container {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    #satellite-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: auto;
+      border-radius: 4px;
+    }
+    #controls { margin: 0.5rem 0; }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin: 0.2rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background: #004999; }
+    #timelapse-thumbs {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+    #timelapse-thumbs img {
+      width: 60px;
+      height: auto;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    #timelapse-thumbs img.selected { border-color: #0066cc; }
   </style>
 </head>
 <body>
@@ -126,10 +158,7 @@
     <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.png" alt="Right Logo">
   </header>
 
-  <h2>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="Pagbilao Logo">
-    Pagbilao, Quezon Summary
-  </h2>
+  <h2><img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="Pagbilao Logo"> Pagbilao, Quezon Summary</h2>
   <div id="summary">Loading summary weather & tide...</div>
 
   <h2>📍 Weather by Barangay</h2>
@@ -138,14 +167,30 @@
   <h2>🚗 Traffic (Maharlika Highway) 🚗</h2>
   <div id="traffic">Loading traffic data...</div>
 
-  <h2>🌬 Windy Map 🌬</h2>
-  <div id="windy">
-<iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
-  </div>
+  <h2>🌬 Windy Map & 🛰 Himawari Satellite Timelapse</h2>
+  <div class="map-sat-container">
+    <div id="windy">
+      <iframe width="100%" height="500" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
+    </div>
 
-  <h2>📺 Latest PAGASA Forecast Video 📺</h2>
-  <div id="pagasa-video">
-    <p>Loading latest PAGASA forecast video...</p>
+    <div id="himawari">
+      <div id="satellite-container">
+        <img id="main-sat-image" src="" alt="Latest Himawari Image">
+        <p id="sat-message">Loading latest satellite image...</p>
+        <div id="controls">
+          <button id="playBtn">▶ Play</button>
+          <button id="pauseBtn">⏸ Pause</button>
+          <label>Speed:
+            <select id="speedSelect">
+              <option value="1000">1x (1s)</option>
+              <option value="500">2x (0.5s)</option>
+              <option value="250">4x (0.25s)</option>
+            </select>
+          </label>
+        </div>
+        <div id="timelapse-thumbs"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Hotline Marquee -->
@@ -154,152 +199,66 @@
   </div>
 
   <script>
-  const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
-  const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
-  const YT_KEY = "AIzaSyAdfwN8_02GUGXTW-cnICzYvWYt1etG4JM";
-  const CHANNEL_ID = "UC0s0vJ4ZjDCyDJVZle14RTA"; // Official PAGASA channel
+  const BASE_SAT_URL = "https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/";
+  const TIMELAPSE_COUNT = 24;
+  const mainImg = document.getElementById("main-sat-image");
+  const msg = document.getElementById("sat-message");
+  const thumbsDiv = document.getElementById("timelapse-thumbs");
+  const playBtn = document.getElementById("playBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const speedSelect = document.getElementById("speedSelect");
 
-  const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
+  let images = [], currentIndex = 0, animTimer = null, frameDelay = parseInt(speedSelect.value);
 
-  const coastalBarangays = ["Bantigue", "Pinagbayanan", "Daungan (Poblacion)", "Polo Iba.", "Polo Ila."];
+  function loadLatestSatellite() {
+    const latestUrl = BASE_SAT_URL + "1-him-colored.png?t=" + Date.now();
+    mainImg.src = latestUrl;
+    mainImg.onerror = () => { msg.textContent = "⚠️ Satellite image unavailable."; };
+    mainImg.onload = () => { msg.textContent = ""; };
+  }
 
-  const barangays = [
-    { name: "Añato", lat: 14.0042, lon: 121.6572 },
-    { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
-    { name: "Antipolo", lat: 13.9868, lon: 121.6648 },
-    { name: "Bagumbungan Iba.", lat: 13.9995, lon: 121.6894 },
-    { name: "Bagumbungan Ila.", lat: 14.0257, lon: 121.6942 },
-    { name: "Bantigue", lat: 13.9396, lon: 121.6944 },
-    { name: "Bigo", lat: 13.9948, lon: 121.6485 },
-    { name: "Binahaan", lat: 13.9898, lon: 121.7579 },
-    { name: "Bukal", lat: 13.9728, lon: 121.6800 },
-    { name: "Castillo (Poblacion)", lat: 13.9711, lon: 121.6831 },
-    { name: "Daungan (Poblacion)", lat: 13.9683, lon: 121.6888 },
-    { name: "Del Carmen (Poblacion)", lat: 13.9685, lon: 121.6856 },
-    { name: "Ikirin", lat: 13.9872, lon: 121.6900 },
-    { name: "Malicboy Kan.", lat: 13.9689, lon: 121.7685 },
-    { name: "Malicboy Sil.", lat: 13.9802, lon: 121.7908 },
-    { name: "Mapagong", lat: 13.9679, lon: 121.6798 },
-    { name: "Mayhay", lat: 13.9771, lon: 121.6842 },
-    { name: "Palsabangon Iba.", lat: 13.9893, lon: 121.7371 },
-    { name: "Palsabangon Ila.", lat: 14.0211, lon: 121.7242 },
-    { name: "Parang (Poblacion)", lat: 13.9710, lon: 121.6897 },
-    { name: "Pinagbayanan", lat: 13.9690, lon: 121.7016 },
-    { name: "Polo Iba.", lat: 13.9055, lon: 121.7496 },
-    { name: "Polo Ila.", lat: 13.9313, lon: 121.7753 },
-    { name: "Sta. Catalina (Poblacion)", lat: 13.9711, lon: 121.6868 },
-    { name: "Talipan", lat: 13.9628, lon: 121.6537 },
-    { name: "Tambak (Poblacion)", lat: 13.9729, lon: 121.6884 },
-    { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
-  ];
-
-  async function fetchWeather(lat, lon) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.cod === 200) {
-        return `
-          <p>🌡 ${data.main.temp}°C (feels like ${data.main.feels_like}°C)</p>
-          <p>💧 Humidity: ${data.main.humidity}%</p>
-          <p>💨 Wind: ${data.wind.speed} m/s</p>
-          <p>☁️ Clouds: ${data.clouds.all}%</p>
-          <p>🌧 Rain: ${(data.rain ? data.rain["1h"] : 0)} mm (1h)</p>
-        `;
-      } else {
-        return `<p>⚠️ Weather not available</p>`;
-      }
-    } catch {
-      return `<p>❌ Error fetching weather</p>`;
+  function buildTimelapse() {
+    thumbsDiv.innerHTML = "";
+    images = [];
+    for (let i = 0; i < TIMELAPSE_COUNT; i++) {
+      const url = BASE_SAT_URL + i + "-him-colored.png?t=" + Date.now();
+      images.push(url);
+      const imgThumb = document.createElement("img");
+      imgThumb.src = url;
+      imgThumb.alt = "Frame " + i;
+      imgThumb.addEventListener("click", () => showFrame(i));
+      thumbsDiv.append(imgThumb);
     }
+    showFrame(0);
   }
 
-  async function fetchTide() {
-    return `
-      <p>🌊 High Tide: 1.8m at 03:20 AM</p>
-      <p>🌊 Low Tide: 0.3m at 10:45 AM</p>
-      <p>📊 <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a></p>
-    `;
+  function showFrame(i) {
+    currentIndex = i;
+    mainImg.src = images[i];
+    Array.from(thumbsDiv.children).forEach(c => c.classList.remove("selected"));
+    if (thumbsDiv.children[i]) thumbsDiv.children[i].classList.add("selected");
   }
 
-  async function loadSummary() {
-    const weather = await fetchWeather(PAGBILAO_LAT, PAGBILAO_LON);
-    const tide = await fetchTide();
-    document.getElementById("summary").innerHTML = weather + tide;
+  function playAnimation() {
+    if (animTimer) return;
+    animTimer = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      showFrame(currentIndex);
+    }, frameDelay);
   }
 
-  async function loadWeather() {
-    const container = document.getElementById("weather");
-    container.innerHTML = "";
-    const results = await Promise.all(barangays.map(async b => {
-      const w = await fetchWeather(b.lat, b.lon);
-      let tideInfo = "";
-      if (coastalBarangays.includes(b.name)) {
-        tideInfo = `
-          <div class="tide-info">
-            🌊 High Tide: 1.8m at 03:20 AM<br>
-            🌊 Low Tide: 0.3m at 10:45 AM<br>
-            📊 <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a>
-          </div>
-        `;
-      }
-      return `<div class="barangay-card"><h3>${b.name}</h3>${w}${tideInfo}</div>`;
-    }));
-    container.innerHTML = results.join("");
-  }
+  function pauseAnimation() { clearInterval(animTimer); animTimer = null; }
 
-  async function loadTraffic() {
-    const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=13.972,121.687&key=${TOMTOM_KEY}`;
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.flowSegmentData) {
-        document.getElementById("traffic").innerHTML = `
-          <p>🚙 Current Speed: ${data.flowSegmentData.currentSpeed} km/h</p>
-          <p>🛣 Free Flow: ${data.flowSegmentData.freeFlowSpeed} km/h</p>
-        `;
-      } else {
-        document.getElementById("traffic").innerText = "⚠️ Traffic data unavailable.";
-      }
-    } catch {
-      document.getElementById("traffic").innerText = "❌ Error loading traffic.";
-    }
-  }
+  speedSelect.addEventListener("change", () => {
+    frameDelay = parseInt(speedSelect.value);
+    if (animTimer) { pauseAnimation(); playAnimation(); }
+  });
+  playBtn.addEventListener("click", playAnimation);
+  pauseBtn.addEventListener("click", pauseAnimation);
 
-  async function loadPagasaVideo() {
-    try {
-      let url = `https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${CHANNEL_ID}&part=snippet&order=date&maxResults=1&type=video`;
-      let res = await fetch(url);
-      let data = await res.json();
-      if (data.items && data.items.length > 0) {
-        const video = data.items[0];
-        const videoId = video.id.videoId;
-        const title = video.snippet.title;
-        const published = new Date(video.snippet.publishedAt).toLocaleString();
-        document.getElementById("pagasa-video").innerHTML = `
-          <h3>${title}</h3>
-          <p>📅 Published: ${published}</p>
-          <iframe width="75%" height="500"
-            src="https://www.youtube.com/embed/${videoId}"
-            frameborder="0" allowfullscreen>
-          </iframe>
-        `;
-      } else {
-        document.getElementById("pagasa-video").innerText = "⚠️ No recent PAGASA videos found.";
-      }
-    } catch {
-      document.getElementById("pagasa-video").innerText = "❌ Error loading PAGASA video.";
-    }
-  }
-
-  loadSummary();
-  loadWeather();
-  loadTraffic();
-  loadPagasaVideo();
-  setInterval(() => { loadSummary(); loadWeather(); }, 4 * 60 * 60 * 1000);
+  loadLatestSatellite();
+  buildTimelapse();
+  setInterval(() => { loadLatestSatellite(); buildTimelapse(); }, 10*60*1000);
   </script>
 </body>
 </html>
-
-
-
