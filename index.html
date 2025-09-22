@@ -166,8 +166,7 @@
   <div id="traffic">Loading traffic data...</div>
 
   <h2>🌬 Windy Map & 🛰 Himawari Satellite</h2>
-  <h2><a href="https://www.pagasa.dost.gov.ph/weather/weather-advisory" target="_blank">View PAGASA Weather Advisory </a></h2>
-  <div id="map-satellite">
+    <div id="map-satellite">
     <div id="windy">
      <iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
     </div>
@@ -185,6 +184,16 @@
             </select>
           </label>
         </div>
+       <!-- PAGASA Advisory Link -->
+        <p>
+          📢 <a href="https://www.pagasa.dost.gov.ph/weather/weather-advisory" target="_blank">
+          Follow the PAGASA Weather Advisory</a>
+        </p>
+        <!-- PAGASA Advisory Link -->
+        <p>
+          📢 <a href="https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin/1" target="_blank">
+          Follow the PAGASA Severe Weather Bulletin</a>
+        </p>
         <div id="timelapse-thumbs"></div>
       </div>
     </div>
@@ -310,7 +319,7 @@
   // === Himawari Animation ===
 const BASE_SAT_URL = "https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/";
 const TIMELAPSE_COUNT = 24;   // still 24 frames for animation
-const THUMB_COUNT = 0;        // only 6 thumbnails displayed
+const THUMB_COUNT = 6;        // only 6 thumbnails displayed
 const mainImg = document.getElementById("main-sat-image");
 const msg = document.getElementById("sat-message");
 const thumbsDiv = document.getElementById("timelapse-thumbs");
@@ -393,3 +402,4 @@ setInterval(() => { loadLatestSatellite(); buildTimelapse(); }, 10*60*1000);
 </html>
 
  
+
