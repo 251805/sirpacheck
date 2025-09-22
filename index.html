@@ -168,7 +168,7 @@
   <h2>🌬 Windy Map & 🛰 Himawari Satellite</h2>
     <div id="map-satellite">
     <div id="windy">
-     <iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
+      <iframe width="100%" height="600" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" frameborder="0"></iframe>
     </div>
     <div id="himawari">
       <div id="satellite-container">
@@ -184,12 +184,10 @@
             </select>
           </label>
         </div>
-       <!-- PAGASA Advisory Link -->
         <p>
           📢 <a href="https://www.pagasa.dost.gov.ph/weather/weather-advisory" target="_blank">
           Follow the PAGASA Weather Advisory</a>
         </p>
-        <!-- PAGASA Advisory Link -->
         <p>
           📢 <a href="https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin/1" target="_blank">
           Follow the PAGASA Severe Weather Bulletin</a>
@@ -199,8 +197,6 @@
     </div>
   </div>
 
-
-  <!-- Hotline Marquee -->
   <div id="hotline">
     <span>📞 HOTLINES — MDRRMO: 09186244564 | 🚒 BUMBERO: 09234424945 | 👮 PULIS: 09985985764 | 🏛 LGU PAGBILAO: (042) 797-0937</span>
   </div>
@@ -210,9 +206,9 @@
   const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec";
   const TOMTOM_KEY = "AnWOBls5vLcwsWYRDnxX8Qf2UKPKHkHb";
 
-  // === Barangays Data ===
   const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
   const coastalBarangays = ["Bantigue","Pinagbayanan","Daungan (Poblacion)","Polo Iba.","Polo Ila."];
+
   const barangays = [
     { name: "Añato", lat: 14.0042, lon: 121.6572 },
     { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
@@ -243,57 +239,67 @@
     { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
   ];
 
-  // === Weather Functions ===
   async function fetchWeather(lat, lon) {
     try {
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
-      const res = await fetch(url);
+      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`);
       const data = await res.json();
       if (data.cod === 200) {
         return `
           <p>🌡 ${data.main.temp}°C (feels like ${data.main.feels_like}°C)</p>
           <p>💧 Humidity: ${data.main.humidity}%</p>
           <p>💨 Wind: ${data.wind.speed} m/s</p>
-          <p>☁️ Clouds: ${data.clouds.all}%</p>
-          <p>🌧 Rain: ${(data.rain ? data.rain["1h"] : 0)} mm (1h)</p>
-        `;
+          <p>☁️ Clouds: ${data.clouds.all}%</p>`;
       }
-      return `<p>⚠️ Weather not available</p>`;
-    } catch {
-      return `<p>❌ Error fetching weather</p>`;
-    }
+    } catch {}
+    return `<p>⚠️ Weather unavailable</p>`;
+  }
+
+  async function fetchRainChance(lat, lon) {
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation_probability&forecast_days=1`);
+      const data = await res.json();
+      if (data.hourly?.precipitation_probability?.length) {
+        return `<p>☔ Rain Chance: ${data.hourly.precipitation_probability[0]}%</p>`;
+      }
+    } catch {}
+    return `<p>⚠️ Rain chance unavailable</p>`;
   }
 
   async function fetchTide() {
-    return `
-      <p>🌊 High Tide: 1.8m at 03:20 AM</p>
-      <p>🌊 Low Tide: 0.3m at 10:45 AM</p>
-      <p>📊 <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a></p>
-    `;
+    try {
+      const res = await fetch("https://api.allorigins.win/get?url=" + encodeURIComponent("https://seatemperature.info/pagbilao-tides.html"));
+      const data = await res.json();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(data.contents, "text/html");
+      const rows = doc.querySelectorAll("table tr");
+      if (rows.length > 1) {
+        const today = rows[1].innerText;
+        return `<p>🌊 ${today.replace(/\s+/g, " ")}</p>
+                <p>📊 <a href="https://seatemperature.info/pagbilao-tides.html" target="_blank">Full Tide Chart</a></p>`;
+      }
+    } catch {}
+    return `<p>⚠️ Tide data unavailable</p>`;
   }
 
   async function loadSummary() {
     const weather = await fetchWeather(PAGBILAO_LAT, PAGBILAO_LON);
+    const rainChance = await fetchRainChance(PAGBILAO_LAT, PAGBILAO_LON);
     const tide = await fetchTide();
-    document.getElementById("summary").innerHTML = weather + tide;
+    document.getElementById("summary").innerHTML = weather + rainChance + tide;
   }
 
   async function loadWeather() {
     const container = document.getElementById("weather");
-    container.innerHTML = "";
+    container.innerHTML = "Loading...";
+    const tideInfo = await fetchTide();
     const results = await Promise.all(barangays.map(async b => {
       const w = await fetchWeather(b.lat, b.lon);
-      let tideInfo = "";
+      const rc = await fetchRainChance(b.lat, b.lon);
+      let tide = "";
       if (coastalBarangays.includes(b.name)) {
-        tideInfo = `
-          <div class="tide-info">
-            🌊 High Tide: 1.8m at 03:20 AM<br>
-            🌊 Low Tide: 0.3m at 10:45 AM<br>
-            📊 <a href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" target="_blank">View Full Tide Chart</a>
-          </div>
-        `;
+        tide = `<div class="tide-info">${tideInfo}</div>`;
       }
-      return `<div class="barangay-card"><h3>${b.name}</h3>${w}${tideInfo}</div>`;
+      return `<div class="barangay-card"><h3>${b.name}</h3>${w}${rc}${tide}</div>`;
     }));
     container.innerHTML = results.join("");
   }
@@ -317,89 +323,82 @@
   }
 
   // === Himawari Animation ===
-const BASE_SAT_URL = "https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/";
-const TIMELAPSE_COUNT = 24;   // still 24 frames for animation
-const THUMB_COUNT = 6;        // only 6 thumbnails displayed
-const mainImg = document.getElementById("main-sat-image");
-const msg = document.getElementById("sat-message");
-const thumbsDiv = document.getElementById("timelapse-thumbs");
-const playBtn = document.getElementById("playBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const speedSelect = document.getElementById("speedSelect");
+  const BASE_SAT_URL = "https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/";
+  const TIMELAPSE_COUNT = 24;    
+  const THUMB_COUNT = 6;         
+  const mainImg = document.getElementById("main-sat-image");
+  const msg = document.getElementById("sat-message");
+  const thumbsDiv = document.getElementById("timelapse-thumbs");
+  const playBtn = document.getElementById("playBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const speedSelect = document.getElementById("speedSelect");
 
-let images = [], currentIndex = 0, animTimer = null, frameDelay = parseInt(speedSelect.value);
+  let images = [], currentIndex = 0, animTimer = null, frameDelay = parseInt(speedSelect.value);
 
-function loadLatestSatellite() {
-  const latestUrl = BASE_SAT_URL + "1-him-colored.png?t=" + Date.now();
-  mainImg.src = latestUrl;
-  mainImg.onerror = () => { msg.textContent = "⚠️ Satellite image unavailable."; };
-  mainImg.onload = () => { msg.textContent = ""; };
-}
-
-function buildTimelapse() {
-  thumbsDiv.innerHTML = "";
-  images = [];
-
-  // Load all 24 frames for animation
-  for (let i = 1; i <= TIMELAPSE_COUNT; i++) {
-    const url = BASE_SAT_URL + i + "-him-colored.png?t=" + Date.now();
-    images.push(url);
+  function loadLatestSatellite() {
+    const latestUrl = BASE_SAT_URL + "1-him-colored.png?t=" + Date.now();
+    mainImg.src = latestUrl;
+    mainImg.onerror = () => { msg.textContent = "⚠️ Satellite image unavailable."; };
+    mainImg.onload = () => { msg.textContent = ""; };
   }
 
-  // Pick 6 evenly spaced frames for thumbnails
-  const step = Math.floor(TIMELAPSE_COUNT / THUMB_COUNT);
-  for (let j = 0; j < THUMB_COUNT; j++) {
-    const frameIndex = j * step;
-    const imgThumb = document.createElement("img");
-    imgThumb.src = images[frameIndex];
-    imgThumb.alt = "Frame " + frameIndex;
-    imgThumb.addEventListener("click", () => showFrame(frameIndex));
-    thumbsDiv.append(imgThumb);
+  function buildTimelapse() {
+    thumbsDiv.innerHTML = "";
+    images = [];
+
+    for (let i = 1; i <= TIMELAPSE_COUNT; i++) {
+      const url = BASE_SAT_URL + i + "-him-colored.png?t=" + Date.now();
+      images.push(url);
+    }
+
+    const step = Math.floor(TIMELAPSE_COUNT / THUMB_COUNT);
+    for (let j = 0; j < THUMB_COUNT; j++) {
+      const frameIndex = j * step;
+      const img = document.createElement("img");
+      img.src = images[frameIndex];
+      img.addEventListener("click", () => showFrame(frameIndex));
+      thumbsDiv.appendChild(img);
+    }
   }
 
-  showFrame(0);
-}
+  function showFrame(index) {
+    currentIndex = index;
+    mainImg.src = images[currentIndex];
+    document.querySelectorAll("#timelapse-thumbs img").forEach((el, i) => {
+      el.classList.toggle("selected", i === Math.floor(currentIndex / Math.floor(TIMELAPSE_COUNT / THUMB_COUNT)));
+    });
+  }
 
-function showFrame(i) {
-  currentIndex = i;
-  mainImg.src = images[i];
-  Array.from(thumbsDiv.children).forEach(c => c.classList.remove("selected"));
-  // Highlight nearest thumbnail if clicked from play loop
-  const nearestThumb = [...thumbsDiv.children].find(
-    (c, idx) => Math.abs(idx * Math.floor(TIMELAPSE_COUNT / THUMB_COUNT) - i) < Math.floor(TIMELAPSE_COUNT / THUMB_COUNT)
-  );
-  if (nearestThumb) nearestThumb.classList.add("selected");
-}
+  function play() {
+    if (animTimer) return;
+    animTimer = setInterval(() => {
+      currentIndex = (currentIndex + 1) % images.length;
+      showFrame(currentIndex);
+    }, frameDelay);
+  }
 
-function playAnimation() {
-  if (animTimer) return;
-  animTimer = setInterval(() => {
-    currentIndex = (currentIndex + 1) % images.length;
-    showFrame(currentIndex);
-  }, frameDelay);
-}
+  function pause() {
+    clearInterval(animTimer);
+    animTimer = null;
+  }
 
-function pauseAnimation() { clearInterval(animTimer); animTimer = null; }
+  speedSelect.addEventListener("change", () => {
+    frameDelay = parseInt(speedSelect.value);
+    if (animTimer) {
+      pause();
+      play();
+    }
+  });
 
-speedSelect.addEventListener("change", () => {
-  frameDelay = parseInt(speedSelect.value);
-  if (animTimer) { pauseAnimation(); playAnimation(); }
-});
-playBtn.addEventListener("click", playAnimation);
-pauseBtn.addEventListener("click", pauseAnimation);
+  playBtn.addEventListener("click", play);
+  pauseBtn.addEventListener("click", pause);
 
-// === INIT LOAD ===
-loadSummary();
-loadWeather();
-loadTraffic();
-loadLatestSatellite();
-buildTimelapse();
-setInterval(() => { loadSummary(); loadWeather(); }, 4*60*60*1000);
-setInterval(() => { loadLatestSatellite(); buildTimelapse(); }, 10*60*1000);
-
+  // === INIT ===
+  loadSummary();
+  loadWeather();
+  loadTraffic();
+  loadLatestSatellite();
+  buildTimelapse();
   </script>
 </body>
 </html>
-
- 
-
