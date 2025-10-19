@@ -35,22 +35,47 @@
 <body class="flex flex-col items-center">
 
   <!-- App container -->
-  <div id="app" class="w-full max-w-7xl">
+  <div id="app" class="w-full max-w-5xl pb-32">
 
-    <!-- Top header -->
-    <div class="card mb-6 p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="logo text-white p-2"><i data-lucide="cloud-snow" class="w-7 h-7 icon-yellow"></i></div>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Pagbilao Weather</h1>
-          <div class="small-muted">Municipality of Pagbilao, Quezon — 13.9714°N, 121.6869°E</div>
-        </div>
-      </div>
-      <div class="text-right small-muted">
-        <div>Source: PAGASA · MeteoPilipinas · Open-Meteo</div>
-        <div id="last-updated" class="text-sm mt-1">Updated: —</div>
+
+  <!-- Top Header -->
+<div class="card mb-6 p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+  <!-- Left Section: Logos and Title -->
+  <div class="flex items-center gap-4">
+    <!-- Left Logo -->
+    <img 
+      src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.png" 
+      alt="MDRRMO Pagbilao Logo" 
+      class="w-14 h-14 object-contain"
+    />
+
+    <!-- Title and Coordinates -->
+    <div class="text-center md:text-left">
+      <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">
+        MDRRMO Pagbilao <span class="text-blue-600">Weather Dashboard</span>
+      </h1>
+      <div class="small-muted font-medium text-gray-600">
+        Municipality of Pagbilao, Quezon — 13.9714°N, 121.6869°E
       </div>
     </div>
+
+    <!-- Right Logo -->
+    <img 
+      src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" 
+      alt="Pagbilao Municipal Logo" 
+      class="w-14 h-14 object-contain"
+    />
+  </div>
+
+  <!-- Right Section: Source Info -->
+  <div class="text-center md:text-right small-muted">
+    <div class="font-semibold text-gray-700">Sources:</div>
+    <div>PAGASA · Windy · Open-Meteo</div>
+    <div id="last-updated" class="text-sm mt-1 italic">Updated: —</div>
+  </div>
+</div>
+
+
 
     <!-- Current conditions + hourly -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -58,7 +83,7 @@
       <!-- Current conditions -->
       <section id="current-panel" class="card p-4">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="calendar-check" class="w-5 h-5 icon-yellow"></i> Current Conditions</h2>
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="calendar-check" class="w-5 h-5 icon-yellow"></i> Current Weather Conditions</h2>
           <div class="small-muted">Local time: <span id="local-time">—</span></div>
         </div>
 
@@ -67,14 +92,15 @@
         </div>
 
         <div class="mt-4 small-muted">
-          <strong>UV Index (today):</strong> <span id="uv-index">—</span>
+          <strong>🌥️UV Index (today):</strong> <span id="uv-index">—</span>
         </div>
+     <strong> <div class="mt-4 small-muted">🌤️UV Max:</strong> <span id="uv-max">—</span></div>
       </section>
 
       <!-- Hourly forecast -->
       <section class="card p-4">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 icon-yellow"></i> Hourly (next 24h)</h2>
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 icon-yellow"></i> Hourly (next 24h) 🌡️Temp | 💧Humidity | 🌬️Wind | ☁️Rain</h2>
           <div class="small-muted">Updated every 2 hours</div>
         </div>
 
@@ -89,10 +115,26 @@
     <div class="card mb-6 p-4">
       <header class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-2xl font-bold">Coastal Information <span style="color:var(--coastal)">Center</span></h2>
-          <div class="small-muted">Tides, sunrise & sunset</div>
+          <h2 class="text-2xl font-bold">Pagbilao High and Low <span style="color:var(--coastal)">Tide Data</span></h2>
+          <div class="small-muted">Tides, sunrise and sunset</div>
         </div>
-        <div class="small-muted">Tides data embedded from LGU sheet</div>
+       
+       
+       <div class="mt-3 space-y-1 text-center">
+  <a 
+    href="https://www.tide-forecast.com/locations/Pagbilao/tides/latest" 
+    target="_blank" 
+    class="font-bold text-blue-600 underline hover:text-blue-800"
+  >
+    🌊 Tides full data 🌊
+  </a>
+</div>
+
+       
+       
+       
+       
+       
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -108,11 +150,11 @@
 
         <!-- Sunrise / sunset -->
         <div>
-          <h3 class="font-semibold mb-2">Sunrise / Sunset</h3>
+          <h3 class="font-semibold mb-2">🌅Sunrise / 🌇Sunset</h3>
           <div id="sun-times" class="grid grid-cols-2 gap-3">
             <!-- populated by JS -->
           </div>
-          <div class="mt-4 small-muted">UV Max: <span id="uv-max">—</span></div>
+          
         </div>
       </div>
     </div>
@@ -138,10 +180,16 @@
             <label class="small-muted">Speed:
               <select id="sat-speed" class="ml-2 border rounded px-2 py-1">
                 <option value="800">1x (0.8s)</option>
-                <option value="300">3x (0.3s)</option>
+                <option value="120">3x (0.3s)</option>
               </select>
             </label>
           </div>
+
+<div class="mt-3 space-y-1">
+          📢 <a href="https://www.pagasa.dost.gov.ph/weather/weather-advisory" target="_blank" class="text-blue-600 underline">PAGASA Weather Advisory</a><br>
+          📢 <a href="https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin/1" target="_blank" class="text-red-600 underline">PAGASA Severe Weather Bulletin</a>
+        </div>
+
 
           <div id="timethumbs" class="flex flex-wrap gap-2 justify-center mt-3"></div>
         </div>
@@ -152,7 +200,7 @@
     <section class="card mb-6 p-4">
       <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
         <i data-lucide="map-pin" class="w-6 h-6 icon-yellow"></i>
-        Barangay Conditions
+        Barangay Weather Update
       </h2>
 
       <div id="barangay-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -161,6 +209,22 @@
     </section>
 
   </div>
+
+
+ <!-- Sticky Disclaimer Footer -->
+  <footer class="fixed bottom-10 left-0 right-0 z-40 bg-white/90 backdrop-blur border-t border-gray-200 shadow-md text-center text-sm text-gray-700 py-3">
+    <div class="flex flex-col md:flex-row items-center justify-center gap-2 px-4">
+      <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+      <p class="max-w-2xl">
+        <span class="font-semibold">Disclaimer:</span> This weather dashboard is for 
+        <span class="font-bold">informational and educational purposes only</span>. 
+        Some data are gathered from <span class="font-semibold">public online sources</span> 
+        and may not always reflect real-time conditions. For verified updates, please refer to 
+        <span class="font-bold">PAGASA</span> or <span class="font-bold">LGU Pagbilao</span>.
+      </p>
+    </div>
+  </footer>
+
 
   <!-- Hotline marquee -->
   <div class="marquee">
@@ -409,6 +473,10 @@
       setInterval(()=>{document.getElementById('local-time').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});},60000);
       setInterval(renderBarangays, WEATHER_UPDATE_MS);
     })();
+    
+    
   </script>
+  
+  
 </body>
 </html>
