@@ -1,492 +1,414 @@
-
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MDRRMO Weather Dashboard Pagbilao</title>
+  <title>Pagbilao Weather Dashboard</title>
+
+  <!-- Tailwind CDN for quick styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     :root{
-      --brand:#0066cc;
-      --bg:#f2f7fb;
-      --card:#fff;
-      --muted:#6b7280;
-      --danger:#cc0000;
-      --radius:10px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --primary:#f59e0b;
+      --bg:#f8fafc;
+      --coastal:#f59e0b;
     }
-    body{margin:0;background:var(--bg);color:#111}
-    header{
-      display:flex;align-items:center;gap:1rem;
-      background:var(--brand);color:#fff;padding:14px 18px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.08);
-    }
-    header img{height:56px;width:auto}
-    header .title{flex:1;text-align:center}
-    header h1{margin:0;font-size:1.4rem}
-    header p{margin:0;font-size:0.9rem;opacity:0.95}
-    main{padding:16px;max-width:1200px;margin:18px auto}
-
-    h2{margin:22px 0 10px;color:#16325c;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px}
-    h2 img{height:44px}
-
-    #summary {
-      background:var(--card);border-radius:var(--radius);padding:14px;
-      box-shadow:0 2px 8px rgba(12,30,60,0.06);display:grid;grid-template-columns:1fr 320px;gap:12px;align-items:center;
-    }
-    #summary .left {padding:8px}
-    #summary .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .stat {background:#fbfdff;border-radius:10px;padding:10px;min-width:140px;text-align:center;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.02)}
-    .stat h3{margin:0;font-size:1.05rem;color:var(--brand)}
-    .stat p{margin:6px 0 0;color:var(--muted);font-size:0.9rem}
-
-    /* center iframes */
-    .iframe-box {display:flex;justify-content:center;align-items:center;padding:8px}
-    .iframe-box iframe{width:100%;max-width:520px;height:200px;border:0;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.08)}
-
-    /* weather grid */
-    #weather {display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:8px}
-    .barangay-card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 2px 8px rgba(12,30,60,0.06)}
-    .barangay-card h3{margin:0 0 8px;color:var(--brand);font-size:1.05rem}
-    .meta{display:flex;flex-wrap:wrap;gap:8px}
-    .meta .m {background:#fbfdff;padding:8px;border-radius:8px;flex:1;min-width:110px;text-align:center;font-size:0.9rem}
-    .small-note{font-size:0.85rem;color:var(--muted);margin-top:6px}
-
-    /* map + satellite */
-    #map-satellite{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-    #windy, #himawari{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 2px 8px rgba(12,30,60,0.06)}
-    #windy iframe{width:100%;height:560px;border:0;border-radius:8px}
-    #satellite-container{text-align:center}
-    #satellite-container img{max-width:100%;height:auto;border-radius:6px;display:block;margin:0 auto}
-    #controls{display:flex;gap:8px;align-items:center;justify-content:center;margin:8px 0}
-    #timelapse-thumbs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-    #timelapse-thumbs img{width:80px;border-radius:6px;cursor:pointer;border:2px solid transparent}
-    #timelapse-thumbs img.selected{border-color:var(--brand)}
-
-    /* hotline */
-    #hotline{background:var(--danger);color:#fff;padding:10px 12px;font-weight:600;position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center}
-    #hotline span{white-space:nowrap;overflow:hidden;display:inline-block;animation:marquee 20s linear infinite}
+    html,body{height:100%}
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue";background:var(--bg);padding:1rem;-webkit-font-smoothing:antialiased;}
+    .card{background:white;border-radius:1rem;box-shadow:0 8px 28px rgba(15,23,42,0.06);padding:1rem;}
+    header .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(90deg,#ffecb3,#ffd54f);display:flex;align-items:center;justify-content:center;font-weight:800;color:#6b21a8;}
+    .icon-yellow{color:var(--primary)}
+    .marquee{background:var(--coastal);color:#080808;padding:10px;font-weight:700;position:fixed;left:0;right:0;bottom:0;z-index:60;}
+    .marquee span{display:inline-block;white-space:nowrap;animation:marquee 22s linear infinite;}
     @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-
-    /* small screens */
-    @media (max-width:980px){
-      #summary{grid-template-columns:1fr}
-      #windy iframe{height:420px}
-      #map-satellite{grid-template-columns:1fr}
-    }
+    .hourly-scroll::-webkit-scrollbar{height:6px}
+    .hourly-scroll::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
+    .sat-thumb.selected{border:3px solid var(--coastal);opacity:1;}
+    .sat-thumb{opacity:0.75;cursor:pointer;transition:all .15s}
+    .kv{font-weight:700;font-size:1.25rem;}
+    .small-muted{color:#6b7280;font-size:.85rem;}
+    @media (min-width:1024px){body{padding:2rem}}
   </style>
 </head>
-<body>
-  <header>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/NEW%20Pagbilao%20Command%20Logo.png" alt="Left Logo">
-    <div class="title">
-      <h1>MDRRMO Weather Dashboard</h1>
-      <p>Barangay Weather Updates — Pagbilao, Quezon</p>
+<body class="flex flex-col items-center">
+
+  <!-- App container -->
+  <div id="app" class="w-full max-w-7xl">
+
+    <!-- Top header -->
+    <div class="card mb-6 p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="logo text-white p-2"><i data-lucide="cloud-snow" class="w-7 h-7 icon-yellow"></i></div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">Pagbilao Weather</h1>
+          <div class="small-muted">Municipality of Pagbilao, Quezon — 13.9714°N, 121.6869°E</div>
+        </div>
+      </div>
+      <div class="text-right small-muted">
+        <div>Source: PAGASA · MeteoPilipinas · Open-Meteo</div>
+        <div id="last-updated" class="text-sm mt-1">Updated: —</div>
+      </div>
     </div>
-    <img src="https://raw.githubusercontent.com/251805/sirpacheck/main/mdrrmo%20pag.png" alt="Right Logo">
-  </header>
 
-  <main>
-    <h2><img src="https://raw.githubusercontent.com/251805/sirpacheck/main/pag%20logo.png" alt="Pagbilao Logo"> Pagbilao Weather Today</h2>
+    <!-- Current conditions + hourly -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-    <section id="summary">
-      <div class="left">
-        <div id="summary-stats" class="row">
-          <!-- filled by JS -->
-        </div>
-        <div id="summary-text" style="margin-top:12px;color:var(--muted)"></div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
-        <div class="iframe-box" style="width:100%">
-          <!-- Centered tide iframe for summary -->
-          <iframe title="Tide Table (Pagbilao)" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTSjbOrTAfSXraI2IFkerl2nC4ks8ICcpT9omyK2LRz8R5jKw5bf-2Zl5_zhNbo0F5u0q5Aqm8AWRZh/pubhtml?gid=0&single=true&widget=true&headers=false"></iframe>
+      <!-- Current conditions -->
+      <section id="current-panel" class="card p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="calendar-check" class="w-5 h-5 icon-yellow"></i> Current Conditions</h2>
+          <div class="small-muted">Local time: <span id="local-time">—</span></div>
         </div>
 
-        <div class="iframe-box" style="width:100%">
-          <!-- Centered sunrise/sunset iframe for summary -->
-          <iframe title="Sunrise Sunset (Pagbilao)" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTSjbOrTAfSXraI2IFkerl2nC4ks8ICcpT9omyK2LRz8R5jKw5bf-2Zl5_zhNbo0F5u0q5Aqm8AWRZh/pubhtml?gid=17538062&single=true&widget=true&headers=false"></iframe>
+        <div id="current-data" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="mt-4 small-muted">
+          <strong>UV Index (today):</strong> <span id="uv-index">—</span>
+        </div>
+      </section>
+
+      <!-- Hourly forecast -->
+      <section class="card p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="clock" class="w-5 h-5 icon-yellow"></i> Hourly (next 24h)</h2>
+          <div class="small-muted">Updated every 2 hours</div>
+        </div>
+
+        <div id="hourly-forecast" class="flex overflow-x-auto hourly-scroll gap-3 pb-3">
+          <!-- hourly cards -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Coastal center -->
+    <div class="card mb-6 p-4">
+      <header class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-2xl font-bold">Coastal Information <span style="color:var(--coastal)">Center</span></h2>
+          <div class="small-muted">Tides, sunrise & sunset</div>
+        </div>
+        <div class="small-muted">Tides data embedded from LGU sheet</div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Tides iframe -->
+        <div>
+          <h3 class="font-semibold mb-2">Tide Charts</h3>
+          <div style="height:320px" class="overflow-hidden rounded-md border">
+            <iframe 
+              src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTSjbOrTAfSXraI2IFkerl2nC4ks8ICcpT9omyK2LRz8R5jKw5bf-2Zl5_zhNbo0F5u0q5Aqm8AWRZh/pubhtml?gid=0&single=true&widget=true&headers=false" 
+              width="100%" height="100%" frameborder="0" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <!-- Sunrise / sunset -->
+        <div>
+          <h3 class="font-semibold mb-2">Sunrise / Sunset</h3>
+          <div id="sun-times" class="grid grid-cols-2 gap-3">
+            <!-- populated by JS -->
+          </div>
+          <div class="mt-4 small-muted">UV Max: <span id="uv-max">—</span></div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <h2>📍 Weather by Barangay</h2>
-    <div id="weather">Loading barangay weather…</div>
-
-    <h2> Windy Map & Himawari Satellite</h2>
-    <div id="map-satellite">
-      <div id="windy">
-        <!-- Windy embed centered -->
-        <iframe src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" title="Windy Map"></iframe>
+    <!-- Map + satellite -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Windy / map -->
+      <div class="card p-0 overflow-hidden">
+        <iframe title="Wind / Map" src="https://embed.windy.com/embed2.html?lat=13.972&lon=121.687&detailLat=13.972&detailLon=121.687&width=650&height=450&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1" class="w-full h-96 lg:h-[560px] border-0"></iframe>
       </div>
 
-      <div id="himawari">
-        <div id="satellite-container">
-          <img id="main-sat-image" src="" alt="Latest Himawari Image" />
-          <p id="sat-message" style="color:var(--muted)">Loading satellite...</p>
+      <!-- Satellite + timelapse -->
+      <div class="card p-4">
+        <h3 class="text-lg font-bold mb-2">Satellite Timelapse (Himawari)</h3>
 
-          <div id="controls">
-            <button id="playBtn" aria-label="Play">▶ Play</button>
-            <button id="pauseBtn" aria-label="Pause">⏸ Pause</button>
-            <label style="font-size:0.95rem">Speed:
-              <select id="speedSelect" style="margin-left:6px">
-                <option value="1000">1x (1s)</option>
-                <option value="250">4x (0.25s)</option>
+        <div id="satellite" class="text-center">
+          <img id="sat-main" src="" alt="Satellite" class="mx-auto rounded-lg shadow-md w-full max-w-[480px]"/>
+          <div id="sat-msg" class="small-muted mt-2">Loading satellite...</div>
+
+          <div class="flex items-center justify-center gap-2 mt-4">
+            <button id="sat-play" class="px-3 py-2 rounded-md bg-yellow-400 font-semibold">▶ Play</button>
+            <button id="sat-pause" class="px-3 py-2 rounded-md bg-gray-200">⏸ Pause</button>
+            <label class="small-muted">Speed:
+              <select id="sat-speed" class="ml-2 border rounded px-2 py-1">
+                <option value="800">1x (0.8s)</option>
+                <option value="300">3x (0.3s)</option>
               </select>
             </label>
           </div>
 
-             📢 <a href="https://www.pagasa.dost.gov.ph/weather/weather-advisory" target="_blank">
-          PAGASA Weather Advisory</a>
-        <p>
-        </p>
-        
-        
-          📢 <a href="https://www.pagasa.dost.gov.ph/tropical-cyclone/severe-weather-bulletin/1" target="_blank">
-          PAGASA Severe Weather Bulletin</a>
-          <div id="timelapse-thumbs"></div>
+          <div id="timethumbs" class="flex flex-wrap gap-2 justify-center mt-3"></div>
         </div>
       </div>
     </div>
-  </main>
 
-  <div id="hotline">
-    <span>📞 HOTLINES — MDRRMO: 09186244564 | 🚒 BUMBERO: 09234424945 | 👮 PULIS: 09985985764 | 🏛 LGU PAGBILAO: (042) 797-0937</span>
+    <!-- Barangay Weather Section -->
+    <section class="card mb-6 p-4">
+      <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <i data-lucide="map-pin" class="w-6 h-6 icon-yellow"></i>
+        Barangay Conditions
+      </h2>
+
+      <div id="barangay-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Barangay cards populated by JS -->
+      </div>
+    </section>
+
   </div>
 
-  <script>
-  /********************************************************************
-   * Pagbilao MDRRMO Weather Dashboard
-   * - Uses Open-Meteo (primary) and OpenWeather (fallback)
-   * - Throttles requests and aggregates summary + per-barangay data
-   ********************************************************************/
+  <!-- Hotline marquee -->
+  <div class="marquee">
+    <span>📞 HOTLINES — MDRRMO 09186244564 | 🚒 BUMBERO 09234424945 | 👮 PULIS 09985985764 | 🏛 LGU PAGBILAO (042) 797-0937</span>
+  </div>
 
-  // ----------------- CONFIG -----------------
-  const PAGBILAO_LAT = 13.9714, PAGBILAO_LON = 121.6869;
-  const OWM_KEY = "d77dbc9c66952dae67f86c58ab653dec"; // fallback key (kept per your original)
-  const TIMEZONE = "Asia/Manila";
+  <!-- JS: Data fetching + rendering -->
+  <script type="module">
+    const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast?latitude=13.9669&longitude=121.6984&daily=sunrise,sunset,uv_index_max&hourly=temperature_2m,rain,relativehumidity_2m,wind_speed_10m,wind_direction_10m,cloudcover,precipitation_probability&timezone=Asia%2FSingapore&forecast_days=2';
+    const SAT_BASE = 'https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/';
+    const SAT_FRAMES = 24;
+    const SAT_THUMBS = 6;
+    const WEATHER_UPDATE_MS = 1000 * 60 * 60 * 2;
+    const SAT_UPDATE_MS = 1000 * 60 * 10;
 
-  // full barangay list (26)
-  const barangays = [
-    { name: "Añato", lat: 14.0042, lon: 121.6572 },
-    { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
-    { name: "Antipolo", lat: 13.9868, lon: 121.6648 },
-    { name: "Bagumbungan Iba.", lat: 13.9995, lon: 121.6894 },
-    { name: "Bagumbungan Ila.", lat: 14.0257, lon: 121.6942 },
-    { name: "Bantigue", lat: 13.9396, lon: 121.6944 },
-    { name: "Bigo", lat: 13.9948, lon: 121.6485 },
-    { name: "Binahaan", lat: 13.9898, lon: 121.7579 },
-    { name: "Bukal", lat: 13.9728, lon: 121.6800 },
-    { name: "Castillo (Poblacion)", lat: 13.9711, lon: 121.6831 },
-    { name: "Daungan (Poblacion)", lat: 13.9683, lon: 121.6888 },
-    { name: "Del Carmen (Poblacion)", lat: 13.9685, lon: 121.6856 },
-    { name: "Ikirin", lat: 13.9872, lon: 121.6900 },
-    { name: "Malicboy Kan.", lat: 13.9689, lon: 121.7685 },
-    { name: "Malicboy Sil.", lat: 13.9802, lon: 121.7908 },
-    { name: "Mapagong", lat: 13.9679, lon: 121.6798 },
-    { name: "Mayhay", lat: 13.9771, lon: 121.6842 },
-    { name: "Palsabangon Iba.", lat: 13.9893, lon: 121.7371 },
-    { name: "Palsabangon Ila.", lat: 14.0211, lon: 121.7242 },
-    { name: "Parang (Poblacion)", lat: 13.9710, lon: 121.6897 },
-    { name: "Pinagbayanan", lat: 13.9690, lon: 121.7016 },
-    { name: "Polo Iba.", lat: 13.9055, lon: 121.7496 },
-    { name: "Polo Ila.", lat: 13.9313, lon: 121.7753 },
-    { name: "Sta. Catalina (Poblacion)", lat: 13.9711, lon: 121.6868 },
-    { name: "Talipan", lat: 13.9628, lon: 121.6537 },
-    { name: "Tambak (Poblacion)", lat: 13.9729, lon: 121.6884 },
-    { name: "Tukalan", lat: 14.0063, lon: 121.6754 }
-  ];
+    const lastUpdated = document.getElementById('last-updated');
+    const localTime = document.getElementById('local-time');
+    const currentData = document.getElementById('current-data');
+    const uvIndexEl = document.getElementById('uv-index');
+    const uvMaxEl = document.getElementById('uv-max');
+    const hourlyContainer = document.getElementById('hourly-forecast');
+    const sunTimesEl = document.getElementById('sun-times');
+    const satMain = document.getElementById('sat-main');
+    const satMsg = document.getElementById('sat-msg');
+    const timethumbs = document.getElementById('timethumbs');
+    const satPlay = document.getElementById('sat-play');
+    const satPause = document.getElementById('sat-pause');
+    const satSpeed = document.getElementById('sat-speed');
 
-  const coastalBarangays = ["Bantigue","Pinagbayanan","Daungan (Poblacion)","Polo Iba.","Polo Ila."];
+    let satImages = [];
+    let satIndex = 0;
+    let satTimer = null;
+    let satDelay = parseInt(satSpeed.value);
 
-  // Open-Meteo query builder
-  function openMeteoUrl(lat, lon) {
-    const hourly = [
-      "temperature_2m",
-      "relativehumidity_2m",
-      "windspeed_10m",
-      "cloudcover",
-      "precipitation_probability"
-    ].join(",");
-    const daily = ["sunrise","sunset"].join(",");
-    // forecast_days=1 is enough to get today's hourly and daily sunrise/sunset
-    return `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${hourly}&daily=${daily}&current_weather=true&timezone=${encodeURIComponent(TIMEZONE)}&forecast_days=2`;
-  }
+    function fmtTimeISO(s){try{return new Date(s).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}catch(e){return'—'}}
+    function statCard(title, value, desc=''){return`<div class="p-3 rounded-lg border border-gray-100 bg-white shadow-sm text-center"><div class="small-muted text-xs">${title}</div><div class="kv mt-1">${value}</div><div class="small-muted mt-1">${desc}</div></div>`}
 
-  // Fallback to OpenWeather (single-point current)
-  function openWeatherUrl(lat, lon) {
-    return `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`;
-  }
-
-  // Helper: produce current hour string in API timezone (format: "YYYY-MM-DDTHH:00")
-  function currentHourIsoInTZ() {
-    // toLocaleString with 'sv' gives "YYYY-MM-DD HH:MM:SS"
-    const s = new Date().toLocaleString('sv', {timeZone: TIMEZONE});
-    // get "YYYY-MM-DD HH"
-    const prefix = s.slice(0,13);
-    return prefix.replace(' ', 'T') + ':00';
-  }
-
-  // Throttled batch runner: delays between calls to be safe vs rate limits
-  async function runThrottled(items, workerFn, delayMs = 220) {
-    // runs sequentially with delay (safe for API limits)
-    const results = [];
-    for (const it of items) {
-      try {
-        const r = await workerFn(it);
-        results.push(r);
-      } catch (err) {
-        results.push({ error: err?.message || String(err) });
+    async function fetchWeather(){
+      try{
+        const r = await fetch(OPEN_METEO_URL + '&_=' + Date.now());
+        if(!r.ok) throw new Error('Weather API error '+r.status);
+        return await r.json();
+      }catch(err){
+        console.error('Weather fetch failed', err);
+        return null;
       }
-      // small delay
-      await new Promise(res => setTimeout(res, delayMs));
     }
-    return results;
-  }
 
-  // Fetch weather via Open-Meteo, parse needed fields, fallback to OpenWeather if needed.
-  async function fetchWeatherForLocation(lat, lon, label) {
-    try {
-      const url = openMeteoUrl(lat, lon);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`Open-Meteo failed: ${res.status}`);
-      const data = await res.json();
-      // Prepare values — prefer current_weather fields and hourly arrays matched to current hour
-      const nowHour = currentHourIsoInTZ();
-      const idx = (data.hourly?.time || []).indexOf(nowHour);
-      // If not found, fallback to index 0
-      const i = idx >= 0 ? idx : 0;
+    function renderWeather(data){
+      if(!data) return;
+      const now = new Date();
+      lastUpdated.textContent = 'Updated: ' + now.toLocaleString();
+      localTime.textContent = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-      const temp = (data.current_weather && data.current_weather.temperature !== undefined)
-        ? data.current_weather.temperature
-        : (data.hourly?.temperature_2m ? data.hourly.temperature_2m[i] : null);
+      const hourly = data.hourly || {};
+      const daily = data.daily || {};
+      const tIndex = 0;
+      const temp = hourly.temperature_2m ? Math.round(hourly.temperature_2m[tIndex])+'°C' : '—';
+      const humid = hourly.relativehumidity_2m ? Math.round(hourly.relativehumidity_2m[tIndex])+'%' : '—';
+      const wind = hourly.wind_speed_10m ? (hourly.wind_speed_10m[tIndex].toFixed(1)+' km/h') : '—';
+      const dir = hourly.wind_direction_10m ? Math.round(hourly.wind_direction_10m[tIndex])+'°' : '—';
+      const clouds = hourly.cloudcover ? Math.round(hourly.cloudcover[tIndex])+'%' : '—';
+      const rainChance = hourly.precipitation_probability ? Math.round(hourly.precipitation_probability[tIndex])+'%' : (hourly.rain && hourly.rain[tIndex] > 0 ? 'Likely' : '—');
 
-      const wind = (data.current_weather && data.current_weather.windspeed !== undefined)
-        ? data.current_weather.windspeed
-        : (data.hourly?.windspeed_10m ? data.hourly.windspeed_10m[i] : null);
+      const uv = daily.uv_index_max && daily.uv_index_max.length ? daily.uv_index_max[0] : '—';
+      uvIndexEl.textContent = uv;
+      uvMaxEl.textContent = uv;
 
-      const humidity = data.hourly?.relativehumidity_2m ? data.hourly.relativehumidity_2m[i] : null;
-      const clouds = data.hourly?.cloudcover ? data.hourly.cloudcover[i] : null;
-      const rainChance = data.hourly?.precipitation_probability ? data.hourly.precipitation_probability[i] : null;
-      const sunrise = data.daily?.sunrise ? data.daily.sunrise[0] : null;
-      const sunset = data.daily?.sunset ? data.daily.sunset[0] : null;
+      currentData.innerHTML = '';
+      currentData.insertAdjacentHTML('beforeend', statCard('Temperature', temp, 'Current air temperature'));
+      currentData.insertAdjacentHTML('beforeend', statCard('Humidity', humid, 'Relative humidity'));
+      currentData.insertAdjacentHTML('beforeend', statCard('Wind', wind, `Dir: ${dir}`));
+      currentData.insertAdjacentHTML('beforeend', statCard('Cloud / Rain', `${clouds} / ${rainChance}`, 'Cloud cover / Rain chance'));
 
-      return {
-        source: 'open-meteo',
-        lat, lon, label,
-        temp, humidity, wind, clouds, rainChance, sunrise, sunset,
-        raw: data
-      };
-    } catch (err) {
-      // fallback: OpenWeather current
-      try {
-        const url = openWeatherUrl(lat, lon);
-        const res = await fetch(url);
-        const data = await res.json();
-        if (res.ok) {
-          return {
-            source: 'open-weather',
-            lat, lon, label,
-            temp: data.main?.temp ?? null,
-            humidity: data.main?.humidity ?? null,
-            wind: data.wind?.speed ?? null,
-            clouds: data.clouds?.all ?? null,
-            rainChance: null, // not directly available here (would need hourly)
-            sunrise: data.sys ? new Date(data.sys.sunrise * 1000).toLocaleString('sv', {timeZone: TIMEZONE}).replace(' ', 'T') : null,
-            sunset: data.sys ? new Date(data.sys.sunset * 1000).toLocaleString('sv', {timeZone: TIMEZONE}).replace(' ', 'T') : null,
-            raw: data
-          };
-        } else {
-          return { error: `OpenWeather fallback failed: ${data?.message || res.status}` };
+      hourlyContainer.innerHTML = '';
+      if(hourly.time && hourly.time.length){
+        const start = 1;
+        const end = Math.min(start + 24, hourly.time.length);
+        for(let i=start;i<end;i++){
+          const time = new Date(hourly.time[i]);
+          const tStr = time.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+          const dStr = time.toLocaleDateString([], {weekday:'short'});
+          const tTemp = hourly.temperature_2m ? Math.round(hourly.temperature_2m[i])+'°C' : '—';
+          const tHum = hourly.relativehumidity_2m ? Math.round(hourly.relativehumidity_2m[i])+'%' : '—';
+          const tWind = hourly.wind_speed_10m ? hourly.wind_speed_10m[i].toFixed(1)+' km/h' : '—';
+          const tCloud = hourly.cloudcover ? Math.round(hourly.cloudcover[i])+'%' : '—';
+          const tRain = hourly.precipitation_probability ? Math.round(hourly.precipitation_probability[i])+'%' : (hourly.rain && hourly.rain[i]>0 ? 'Likely' : '—');
+
+          const card = document.createElement('div');
+          card.className = 'flex-shrink-0 w-36 p-3 rounded-xl bg-white border border-gray-100 shadow-sm text-left';
+          card.innerHTML = `<div class="text-sm font-semibold">${tStr}</div><div class="small-muted text-xs mb-2">${dStr}</div><div class="kv">${tTemp}</div><div class="small-muted mt-1">${tRain} · ${tCloud} · ${tWind}</div><div class="small-muted text-xs mt-2">Humid: ${tHum}</div>`;
+          hourlyContainer.appendChild(card);
         }
-      } catch (err2) {
-        return { error: 'Both Open-Meteo and OpenWeather failed' };
+      }
+      lucide.createIcons();
+    }
+
+    function renderSunTimes(data){
+      if(!data || !data.daily) return;
+      const sunrise = data.daily.sunrise && data.daily.sunrise.length ? fmtTimeISO(data.daily.sunrise[0]) : '—';
+      const sunset  = data.daily.sunset  && data.daily.sunset.length  ? fmtTimeISO(data.daily.sunset[0])  : '—';
+      sunTimesEl.innerHTML = `
+        <div class="p-3 rounded-md bg-white border shadow-sm text-center"><div class="small-muted">Sunrise</div><div class="kv mt-1">${sunrise}</div></div>
+        <div class="p-3 rounded-md bg-white border shadow-sm text-center"><div class="small-muted">Sunset</div><div class="kv mt-1">${sunset}</div></div>`;
+    }
+
+    async function refreshWeather(){
+      const data = await fetchWeather();
+      if(data){renderWeather(data);renderSunTimes(data);}
+    }
+
+    // ---------------- Satellite ----------------
+    function satUrl(i){return SAT_BASE + i + '-him-colored.png?t=' + Date.now();}
+    function buildSatFrames(){
+      satImages = [];
+      for(let i=1;i<=SAT_FRAMES;i++) satImages.push(satUrl(i));
+      timethumbs.innerHTML = '';
+      const step = Math.ceil(SAT_FRAMES / SAT_THUMBS);
+      for(let j=0;j<SAT_THUMBS;j++){
+        const idx = j*step;
+        const img=document.createElement('img');
+        img.src=satImages[idx];
+        img.width=64;img.height=64;
+        img.alt=`Satellite frame ${idx}`;
+        img.className=`sat-thumb rounded`;
+        img.addEventListener('click',()=>{showSatFrame(idx);pauseSat();});
+        timethumbs.appendChild(img);
+      }
+      showSatFrame(0);
+    }
+
+    function showSatFrame(idx){
+      satIndex=idx%satImages.length;
+      satMain.src=satImages[satIndex];
+      const thumbs=timethumbs.querySelectorAll('img');
+      thumbs.forEach((t,i)=>t.classList.toggle('selected',Math.floor(satIndex/Math.floor(SAT_FRAMES/SAT_THUMBS))===i));
+    }
+
+    function playSat(){
+      if(satTimer) return;
+      satTimer=setInterval(()=>{satIndex=(satIndex+1)%satImages.length;showSatFrame(satIndex);},satDelay);
+    }
+    function pauseSat(){clearInterval(satTimer);satTimer=null;}
+    satPlay.addEventListener('click',()=>{playSat();});
+    satPause.addEventListener('click',()=>{pauseSat();});
+    satSpeed.addEventListener('change',()=>{satDelay=parseInt(satSpeed.value);if(satTimer){pauseSat();playSat();}});
+
+    async function refreshSatellite(){
+      try{buildSatFrames();satMsg.textContent='';}catch(e){satMsg.textContent='Satellite not available';console.error(e);}
+    }
+
+    // ---------------- Barangay Section ----------------
+    const barangays = [
+      { name: "Añato", lat: 14.0042, lon: 121.6572 },
+      { name: "Alupaye", lat: 13.9473, lon: 121.6697 },
+      { name: "Antipolo", lat: 13.9868, lon: 121.6648 },
+      { name: "Bagumbungan Iba", lat: 13.9995, lon: 121.6894 },
+      { name: "Bagumbungan Ila", lat: 14.0257, lon: 121.6942 },
+      { name: "Bantigue", lat: 13.9396, lon: 121.6944 },
+      { name: "Bigo", lat: 13.9948, lon: 121.6485 },
+      { name: "Binahaan", lat: 13.9898, lon: 121.7579 },
+      { name: "Bukal", lat: 13.9728, lon: 121.6800 },
+      { name: "Castillo (Poblacion)", lat: 13.9711, lon: 121.6831 },
+      { name: "Daungan (Poblacion)", lat: 13.9683, lon: 121.6888 },
+      { name: "Del Carmen", lat: 13.9685, lon: 121.6856 },
+      { name: "Ikirin", lat: 13.9872, lon: 121.6900 },
+      { name: "Malicboy Kan.", lat: 13.9689, lon: 121.7685 },
+      { name: "Malicboy Sil.", lat: 13.9802, lon: 121.7908 },
+      { name: "Mapagong", lat: 13.9679, lon: 121.6798 },
+      { name: "Mayhay", lat: 13.9771, lon: 121.6842 },
+      { name: "Palsabangon Iba", lat: 13.9893, lon: 121.7371 },
+      { name: "Palsabangon Ila", lat: 14.0211, lon: 121.7242 },
+      { name: "Parang", lat: 13.9710, lon: 121.6897 },
+      { name: "Pinagbayanan", lat: 13.9690, lon: 121.7016 },
+      { name: "Polo Iba", lat: 13.9055, lon: 121.7496 },
+      { name: "Polo Ila", lat: 13.9313, lon: 121.7753 },
+      { name: "Sta. Catalina", lat: 13.9711, lon: 121.6868 },
+      { name: "Talipan", lat: 13.9628, lon: 121.6537 },
+      { name: "Tambak", lat: 13.9729, lon: 121.6884 },
+      { name: "Tukalan", lat: 14.0063, lon: 121.6754 },
+    ];
+
+    barangays.sort((a,b)=>a.name.localeCompare(b.name));
+
+    const barangayGrid = document.getElementById("barangay-grid");
+
+    async function fetchBarangayWeather(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,cloud_cover,precipitation_probability&daily=sunrise,sunset&timezone=Asia%2FSingapore`;
+      const r = await fetch(url);
+      if(!r.ok) throw new Error(`Weather error ${r.status}`);
+      return r.json();
+    }
+
+    async function renderBarangays(){
+      barangayGrid.innerHTML = '';
+      for(const b of barangays){
+        try{
+          const data = await fetchBarangayWeather(b.lat,b.lon);
+          const c = data.current || {};
+          const d = data.daily || {};
+
+          const temp = c.temperature_2m ? `${Math.round(c.temperature_2m)}°C`:'—';
+          const humid = c.relative_humidity_2m ? `${Math.round(c.relative_humidity_2m)}%`:'—';
+          const wind = c.wind_speed_10m ? `${c.wind_speed_10m.toFixed(1)} km/h`:'—';
+          const cloud = c.cloud_cover ? `${Math.round(c.cloud_cover)}%`:'—';
+          const rainChance = c.precipitation_probability!==undefined?`${Math.round(c.precipitation_probability)}%`:'—';
+          const sunrise = d.sunrise ? fmtTimeISO(d.sunrise[0]):'—';
+          const sunset = d.sunset ? fmtTimeISO(d.sunset[0]):'—';
+
+          const mapUrl = `https://www.google.com/maps?q=${b.lat},${b.lon}`;
+          const card = document.createElement('a');
+          card.href = mapUrl;
+          card.target = "_blank";
+          card.className = "p-4 rounded-xl border bg-white shadow-sm block hover:shadow-md transition";
+          card.innerHTML = `
+            <div class="font-bold text-lg text-gray-800 mb-1">${b.name}</div>
+            <div class="text-sm text-gray-500 mb-2">${b.lat.toFixed(4)}, ${b.lon.toFixed(4)}</div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div>🌡️ Temp: <strong>${temp}</strong></div>
+              <div>💧 Humidity: <strong>${humid}</strong></div>
+              <div>🌬️ Wind: <strong>${wind}</strong></div>
+              <div>☁️ Cloud/Rain: <strong>${cloud} / ${rainChance}</strong></div>
+              <div>🌅 Sunrise: <strong>${sunrise}</strong></div>
+              <div>🌇 Sunset: <strong>${sunset}</strong></div>
+            </div>
+          `;
+          barangayGrid.appendChild(card);
+        }catch(err){
+          console.error("Barangay weather failed", b.name, err);
+          const card = document.createElement("div");
+          card.className = "p-4 rounded-xl border bg-white shadow-sm text-center";
+          card.innerHTML = `<div class="font-bold text-lg">${b.name}</div><div class="text-sm text-gray-500">Weather unavailable</div>`;
+          barangayGrid.appendChild(card);
+        }
       }
     }
-  }
 
-  // Aggregate summary for Pagbilao (averages + simple rules)
-  function computeSummary(allData) {
-    const valid = allData.filter(d => !d.error && (d.temp !== null && d.temp !== undefined));
-    if (!valid.length) return null;
-    const avg = arr => (arr.reduce((s,v)=>s+v,0)/arr.length);
-    const temps = valid.map(d => d.temp);
-    const winds = valid.map(d => d.wind ?? 0);
-    const hums = valid.map(d => d.humidity ?? 0);
-    const clouds = valid.map(d => d.clouds ?? 0);
-    const rainChances = valid.map(d => d.rainChance ?? 0);
-    const sunrise = valid[0].sunrise || null;
-    const sunset = valid[0].sunset || null;
-
-    return {
-      temp_avg: round(avg(temps),1),
-      temp_min: Math.min(...temps),
-      temp_max: Math.max(...temps),
-      wind_avg: round(avg(winds),1),
-      humidity_avg: Math.round(avg(hums)),
-      clouds_avg: Math.round(avg(clouds)),
-      rain_max: Math.round(Math.max(...rainChances)),
-      sunrise, sunset
-    };
-  }
-
-  function round(v,dec=0){ return Number(Math.round(v * (10**dec)) / (10**dec)); }
-
-  // Render functions
-  function renderSummary(summary) {
-    const container = document.getElementById('summary-stats');
-    if (!summary) {
-      container.innerHTML = `<div class="stat"><h3>⚠️ No data</h3><p>Data unavailable</p></div>`;
-      return;
-    }
-    container.innerHTML = `
-      <div class="stat"><h3>🌡 ${summary.temp_avg}°C</h3><p>Avg (min ${summary.temp_min} / max ${summary.temp_max})</p></div>
-      <div class="stat"><h3>💧 ${summary.humidity_avg}%</h3><p>Avg Humidity</p></div>
-      <div class="stat"><h3>💨 ${summary.wind_avg} m/s</h3><p>Avg Wind</p></div>
-      <div class="stat"><h3>☁️ ${summary.clouds_avg}%</h3><p>Avg Clouds</p></div>
-      <div class="stat"><h3>☔ ${summary.rain_max}%</h3><p>Peak Rain Chance (next 24h)</p></div>
-    `;
-    const txt = document.getElementById('summary-text');
-    txt.innerHTML = `<div class="small-note">Sunrise: ${formatMaybe(summary.sunrise)} — Sunset: ${formatMaybe(summary.sunset)}</div>`;
-  }
-
-  function formatMaybe(s) {
-    if (!s) return '—';
-    // s may be full ISO "2025-10-14T05:31" or similar - return local time
-    try {
-      const d = new Date(s);
-      // show time only in hh:mm AM/PM
-      return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',timeZone: TIMEZONE});
-    } catch(e){ return s; }
-  }
-
-  function createBarangayCard(d) {
-    if (d.error) {
-      return `<div class="barangay-card"><h3>${d.label || 'Unknown'}</h3><div class="small-note">⚠️ ${d.error}</div></div>`;
-    }
-    const tideFrame = coastalBarangays.includes(d.label) ? `
-      <div class="iframe-box" style="margin-top:8px">
-        <iframe title="Tide (Pagbilao)" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTSjbOrTAfSXraI2IFkerl2nC4ks8ICcpT9omyK2LRz8R5jKw5bf-2Zl5_zhNbo0F5u0q5Aqm8AWRZh/pubhtml?gid=0&single=true&widget=true&headers=false"></iframe>
-      </div>` : '';
-
-    return `
-      <div class="barangay-card">
-        <h3>${d.label}</h3>
-        <div class="meta">
-          <div class="m">🌡 ${d.temp !== null ? d.temp + '°C' : '—'}</div>
-          <div class="m">💧 ${d.humidity !== null ? d.humidity + '%' : '—'}</div>
-          <div class="m">💨 ${d.wind !== null ? d.wind + ' m/s' : '—'}</div>
-          <div class="m">☁️ ${d.clouds !== null ? d.clouds + '%' : '—'}</div>
-          <div class="m">☔ ${d.rainChance !== null ? d.rainChance + '%' : '—'}</div>
-        </div>
-        <div class="small-note">Sunrise: ${formatMaybe(d.sunrise)} • Sunset: ${formatMaybe(d.sunset)}</div>
-        ${tideFrame}
-      </div>
-    `;
-  }
-
-  // ----------------- INIT / LOADING -----------------
-  async function initDashboard() {
-    // 1) First grab Pagbilao summary point (single call)
-    try {
-      const main = await fetchWeatherForLocation(PAGBILAO_LAT, PAGBILAO_LON, 'Pagbilao (Center)');
-      // 2) Fetch all barangays (throttled to avoid burst)
-      const work = barangays.map(b => ({lat:b.lat, lon:b.lon, label:b.name}));
-      const results = await runThrottled(work, async it => fetchWeatherForLocation(it.lat, it.lon, it.label), 220);
-
-      // Combine Pagbilao center + barangays to compute region summary
-      const combined = [main, ...results];
-      const summary = computeSummary(combined);
-      renderSummary(summary);
-
-      // Render barangay grid
-      const grid = document.getElementById('weather');
-      grid.innerHTML = results.map(r => createBarangayCard(r)).join('');
-    } catch (err) {
-      console.error(err);
-      document.getElementById('weather').innerHTML = `<div class="small-note">Error loading data: ${err.message || err}</div>`;
-    }
-  }
-
-  // Call init
-  initDashboard();
-
-  // ----------------- Himawari satellite timelapse -----------------
-  (function satelliteTimelapse(){
-    // Using your base from original; images served by meteopilipinas
-    const BASE_SAT_URL = "https://src.meteopilipinas.gov.ph/repo/mtsat-colored/24hour/";
-    const TIMELAPSE_COUNT = 24;
-    const THUMB_COUNT = 6;
-    const mainImg = document.getElementById("main-sat-image");
-    const msg = document.getElementById("sat-message");
-    const thumbsDiv = document.getElementById("timelapse-thumbs");
-    const playBtn = document.getElementById("playBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const speedSelect = document.getElementById("speedSelect");
-
-    let images = [], currentIndex = 0, animTimer = null, frameDelay = parseInt(speedSelect.value);
-
-    function stampUrl(i){
-      return BASE_SAT_URL + i + "-him-colored.png?t=" + Date.now();
-    }
-    function loadLatestSatellite(){
-      // attempt 1-him-colored as 'latest'
-      const latest = stampUrl(1);
-      mainImg.src = latest;
-      mainImg.onload = () => { msg.textContent = ""; };
-      mainImg.onerror = () => { msg.textContent = "⚠️ Satellite image unavailable."; };
-    }
-
-    function buildTimelapse(){
-      thumbsDiv.innerHTML = "";
-      images = [];
-      for (let i = 1; i <= TIMELAPSE_COUNT; i++) {
-        images.push(stampUrl(i));
-      }
-      const step = Math.floor(TIMELAPSE_COUNT / THUMB_COUNT);
-      for (let j = 0; j < THUMB_COUNT; j++) {
-        const frameIndex = j * step;
-        const img = document.createElement("img");
-        img.src = images[frameIndex];
-        img.addEventListener("click", () => showFrame(frameIndex));
-        thumbsDiv.appendChild(img);
-      }
-      // show first frame
-      showFrame(0);
-    }
-
-    function showFrame(index) {
-      currentIndex = index % images.length;
-      mainImg.src = images[currentIndex];
-      // highlight thumb
-      const thumbs = thumbsDiv.querySelectorAll('img');
-      thumbs.forEach((t, i) => t.classList.toggle('selected', i === Math.floor(currentIndex / Math.floor(TIMELAPSE_COUNT / THUMB_COUNT))));
-    }
-
-    function play() {
-      if (animTimer) return;
-      animTimer = setInterval(()=> {
-        currentIndex = (currentIndex + 1) % images.length;
-        showFrame(currentIndex);
-      }, frameDelay);
-    }
-    function pause() { clearInterval(animTimer); animTimer = null; }
-
-    speedSelect.addEventListener('change', ()=>{
-      frameDelay = parseInt(speedSelect.value);
-      if (animTimer) { pause(); play(); }
-    });
-    playBtn.addEventListener('click', play);
-    pauseBtn.addEventListener('click', pause);
-
-    // init
-    loadLatestSatellite();
-    buildTimelapse();
-  })();
-
-  // ----------------- End script -----------------
+    // Init
+    (async function init(){
+      await refreshWeather();
+      await refreshSatellite();
+      await renderBarangays();
+      lucide.createIcons();
+      setInterval(refreshWeather, WEATHER_UPDATE_MS);
+      setInterval(refreshSatellite, SAT_UPDATE_MS);
+      setInterval(()=>{document.getElementById('local-time').textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});},60000);
+      setInterval(renderBarangays, WEATHER_UPDATE_MS);
+    })();
   </script>
 </body>
 </html>
- 
