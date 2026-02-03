@@ -119,7 +119,7 @@
       <div class="card p-4">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-lg font-bold">Map / Weather Provider</h3>
-          <div class="text-sm small-muted">Select provider to show beside satellite</div>
+          <div class="text-sm small-muted">Select Windy / Ventusky to refresh data</div>
         </div>
         <div class="flex items-center gap-3 mb-3">
           <label for="mapProviderSelect" class="small-muted">Provider:</label>
@@ -225,6 +225,21 @@
       });
     })();
     </script>
+    
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; font-family: sans-serif; padding: 20px;">
+  <h2 style="margin-bottom: 10px;">Maharlika Highway: Pagbilao Live Map</h2>
+  
+  <iframe 
+    src="https://embed.waze.com/iframe?zoom=16&lat=13.979412&lon=121.800453&ct=livemap" 
+    width="600" 
+    height="450" 
+    allowfullscreen 
+    style="border: 2px solid #333; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  </iframe>
+
+  <p style="margin-top: 10px; color: #666;">Source: Waze Live Map</p>
+</div>
+    
     <!-- Barangay Weather Section -->
     <section class="card mb-6 p-4">
       <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
