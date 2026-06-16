@@ -1,0 +1,12 @@
+{
+  "name": "GSO Procurement System",
+  "short_name": "GSO Procure",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0F172A",
+  "icons": [
+    { "src": "gso.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "gso.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,5 @@
+2026-04-30
+- Replaced weather dashboard UI with GSO Procurement System prototype.
+- Added role splash, guest PR/RIS flows, field validation, GSOID generator, department constants.
+- Added left navigation integrations (pricelist, Google Chat, Facebook chat, live link).
+- Added PWA files (manifest.json, sw.js) and branding updates.
